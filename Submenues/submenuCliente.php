@@ -30,7 +30,9 @@ function cargarClientesDesdeBD()
 
 function menuClientes()
 {
+    echo "=================================";
     echo "\nMenú de Gestionar Clientes\n";
+    echo "=================================\n";
     echo "1. Alta de Cliente\n";
     echo "2. Modificar Cliente\n";
     echo "3. Eliminar Cliente\n";
@@ -71,8 +73,10 @@ function altaCliente()
 {
     global $clientes;
 
+    echo "=======================";
     echo "\nAlta de Cliente\n";
-
+    echo "=======================\n";
+    
     while (true) {
         // Solicitar datos del cliente al usuario
         echo "Ingrese el DNI del cliente: ";
@@ -122,9 +126,10 @@ function altaCliente()
 function modificarCliente()
 {
     global $clientes;
-
+    echo "=======================";
     echo "\nModificar Cliente\n";
-
+    echo "=======================\n";
+    
     // Solicitar DNI del cliente a modificar
     echo "Ingrese el DNI del cliente que desea modificar (o deje en blanco para volver al Menú Principal): ";
     $dni = trim(fgets(STDIN));
@@ -191,9 +196,10 @@ function modificarCliente()
 function eliminarCliente()
 {
     global $clientes;
-
+    echo "=======================";
     echo "\nEliminar Cliente\n";
-
+    echo "=======================\n";
+    
     // Solicitar DNI del cliente a eliminar
     echo "Ingrese el DNI del cliente que desea eliminar: ";
     $dni = trim(fgets(STDIN));
@@ -248,19 +254,21 @@ function listarClientes()
     global $clientes;
     echo "=================================";
     echo "\nListado de Clientes\n";
-    echo "=================================\n";
+    echo "=================================";
+
     // Listar clientes en memoria
     if (empty($clientes)) {
         echo "No hay clientes registrados en la memoria.\n";
     } else {
-        echo "Clientes en memoria:\n";
+        echo "\nClientes en memoria:\n";
+        echo "------------------------------\n";
         foreach ($clientes as $cliente) {
             echo "DNI: " . $cliente->getDni() . "\n";
             echo "Nombre: " . $cliente->getNombre() . "\n";
             echo "Dirección: " . $cliente->getDireccion() . "\n";
             echo "Teléfono: " . $cliente->getTelefono() . "\n";
             echo "Email: " . $cliente->getEmail() . "\n";
-            echo "---------------------------\n";
+            echo "------------------------------\n";
         }
     }
 
@@ -276,6 +284,7 @@ function listarClientes()
         echo "No hay clientes registrados en la base de datos.\n";
     } else {
         echo "Clientes en la base de datos:\n";
+        echo "------------------------------\n";
         foreach ($clientesDesdeBD as $cliente) {
             echo "DNI: " . $cliente['dni'] . "\n";
             echo "Nombre: " . $cliente['nombre'] . "\n";
@@ -325,8 +334,9 @@ function buscarClientePorDNI($dni)
 // Función para buscar clientes por nombre o parte del nombre
 function buscarClientesPorNombre()
 {
-    echo "Búsqueda de Clientes por Nombre\n";
-
+    echo "==================================";
+    echo "\nBúsqueda de Clientes por Nombre\n";
+    echo "==================================\n";
     echo "Ingrese el nombre o parte del nombre a buscar: ";
     $nombre = trim(fgets(STDIN));
 
@@ -355,7 +365,10 @@ function buscarClientesPorNombre()
     if (empty($resultados)) {
         echo "No se encontraron clientes en la base de datos que coincidan con la búsqueda.\n";
     } else {
-        echo "Clientes encontrados en la base de datos:\n";
+        echo "==============================================";
+        echo "\nClientes encontrados en la base de datos:\n";
+        echo "==============================================\n";
+
         foreach ($resultados as $cliente) {
             echo "---------------------------\n";
             echo "DNI: " . $cliente->getDni() . "\n";
@@ -366,8 +379,10 @@ function buscarClientesPorNombre()
             echo "---------------------------\n";
         }
     }
-
-    echo "Clientes en memoria:\n";
+    echo "=====================================";
+    echo "\nClientes encontrados en memoria:\n";
+    echo "=====================================\n";
+    
     global $clientes;
     if (empty($clientes)) {
         echo "No hay clientes en memoria.\n";

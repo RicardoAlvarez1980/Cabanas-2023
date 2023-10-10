@@ -2,7 +2,10 @@
 // Función para el submenú de listados
 function menuListados()
 {
-    echo "\nMenú de Listados\n";
+    echo "==================================================\n";
+    echo "Menú de Listados";
+    echo "\n==================================================\n";
+
     echo "1. Listar Clientes\n";
     echo "2. Listar Cabañas\n";
     echo "3. Listar Reservas\n";

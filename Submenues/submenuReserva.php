@@ -32,7 +32,10 @@ function cargarReservasDesdeBD()
 // Menú de Gestionar Reservas
 function menuReservas()
 {
+    echo "=================================";
     echo "\nMenú de Gestionar Reservas\n";
+    echo "=================================\n";
+    
     echo "1. Alta de Reserva\n";
     echo "2. Modificar Reserva\n";
     echo "3. Eliminar Reserva\n";
@@ -95,7 +98,9 @@ function altaReserva()
 
     while (true) {
         // Mostrar lista de cabañas disponibles
+        echo "---------------------------------";
         echo "Cabañas Disponibles:\n";
+        echo "---------------------------------\n";
         foreach ($cabanas as $cabana) {
             echo "Número: " . $cabana->getNumero() . "\n";
             echo "---------------------------\n";

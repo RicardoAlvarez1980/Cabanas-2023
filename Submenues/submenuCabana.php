@@ -30,7 +30,9 @@ function cargarCabanasDesdeBD()
 // Menú de Gestionar Cabañas
 function menuCabanas()
 {
+    echo "=================================";
     echo "\nMenú de Gestionar Cabañas\n";
+    echo "=================================\n";
     echo "1. Alta de Cabaña\n";
     echo "2. Modificar Cabaña\n";
     echo "3. Eliminar Cabaña\n";
@@ -71,7 +73,9 @@ function altaCabana()
 {
     global $cabanas; // Esto es para mantener la lógica existente
 
+    echo "=======================";
     echo "\nAlta de Cabaña\n";
+    echo "=======================\n";
 
     while (true) {
         // Solicitar datos de la cabaña al usuario
@@ -123,8 +127,9 @@ function altaCabana()
 function modificarCabana()
 {
     global $cabanas;
-
+    echo "=======================";
     echo "\nModificar Cabaña\n";
+    echo "=======================\n";
 
     // Solicitar número de cabaña a modificar
     echo "Ingrese el número de cabaña que desea modificar (o deje en blanco para volver al Menú Principal): ";
@@ -187,7 +192,9 @@ function eliminarCabana()
 {
     global $cabanas;
 
+    echo "=======================";
     echo "\nEliminar Cabaña\n";
+    echo "=======================\n";
 
     // Solicitar número de cabaña a eliminar
     echo "Ingrese el número de cabaña que desea eliminar: ";
@@ -251,12 +258,13 @@ function listarCabanas()
         echo "No hay cabañas registradas en memoria.\n";
     } else {
         echo "Cabañas en memoria:\n";
+        echo "-------------------------------\n";
         foreach ($cabanas as $cabana) {
             echo "Número: " . $cabana->getNumero() . "\n";
             echo "Capacidad: " . $cabana->getCapacidad() . "\n";
             echo "Descripción: " . $cabana->getDescripcion() . "\n";
             echo "Costo Diario: $" . $cabana->getCostoDiario() . "\n";
-            echo "---------------------------";
+            echo "-------------------------------";
         }
     }
 
@@ -269,13 +277,14 @@ function listarCabanas()
     $cabanasDesdeBD = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (!empty($cabanasDesdeBD)) {
-        echo "Cabañas en la base de datos:\n";
+        echo "\nCabañas en la base de datos:\n";
+        echo "-------------------------------\n";
         foreach ($cabanasDesdeBD as $cabanaDesdeBD) {
             echo "Número: " . $cabanaDesdeBD['numero'] . "\n";
             echo "Capacidad: " . $cabanaDesdeBD['capacidad'] . "\n";
             echo "Descripción: " . $cabanaDesdeBD['descripcion'] . "\n";
             echo "Costo Diario: $" . $cabanaDesdeBD['costo_diario'] . "\n";
-            echo "---------------------------\n";
+            echo "-------------------------------";
         }
     } else {
         echo "No hay cabañas registradas en la base de datos.\n";

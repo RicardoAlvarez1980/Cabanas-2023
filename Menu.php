@@ -24,8 +24,11 @@ function menuPrincipal()
     cargarCabanasDesdeBD();
     cargarReservasDesdeBD();
 
-    echo "Bienvenido a CabinManager, su gestor de reservas!\n";
-    echo "Menú Principal\n";
+    echo "==================================================\n";
+    echo "Bienvenido a CabinManager, su gestor de reservas!";
+    echo "\n==================================================\n";
+    echo "-- Menú Principal --";
+    echo "\n--------------------\n";
     echo "1. Gestionar Clientes\n";
     echo "2. Gestionar Cabañas\n";
     echo "3. Gestionar Reservas\n";
