@@ -50,10 +50,16 @@ class Reservas {
     }
     public function calcularCostoTotal()
     {
-        // Suponiendo que $this->cabana->getCostoDiario() te da el costo diario de la cabaña
-        $dias = $this->calcularDiferenciaDias();
-        $costoTotal = $dias * $this->cabana->getCostoDiario();
-        return $costoTotal;
+        // Verificar si $this->cabana es un objeto válido de la clase Cabanas
+        if ($this->cabana instanceof Cabanas) {
+            // Suponiendo que $this->cabana->getCostoDiario() te da el costo diario de la cabaña
+            $dias = $this->calcularDiferenciaDias();
+            $costoTotal = $dias * $this->cabana->getCostoDiario();
+            return $costoTotal;
+        } else {
+            // Manejar el caso en que $this->cabana no sea un objeto válido
+            return 0; // O cualquier otro valor apropiado en este caso
+        }
     }
 
     public function calcularDiferenciaDias()

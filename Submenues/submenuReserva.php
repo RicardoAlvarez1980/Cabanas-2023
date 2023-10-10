@@ -20,10 +20,10 @@ function cargarReservasDesdeBD()
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $reserva = new Reservas(
             $row['numero_reserva'],
-            $row['dni_cliente'],
-            $row['numero_cabana'],
             $row['fecha_inicio'],
-            $row['fecha_fin']
+            $row['fecha_fin'],
+            $row['cliente_dni'],
+            $row['cabana_numero']
         );
         $reservas[] = $reserva;
     }
@@ -99,7 +99,7 @@ function altaReserva()
     while (true) {
         // Mostrar lista de cabañas disponibles
         echo "---------------------------------";
-        echo "Cabañas Disponibles:\n";
+        echo "\nCabañas Disponibles:\n";
         echo "---------------------------------\n";
         foreach ($cabanas as $cabana) {
             echo "Número: " . $cabana->getNumero() . "\n";
@@ -132,7 +132,18 @@ function altaReserva()
     $reserva = new Reservas(count($reservas) + 1, $fechaInicio, $fechaFin, $clienteSeleccionado, $cabanaSeleccionada);
     $reservas[] = $reserva;
 
-    echo "Reserva agregada exitosamente.\n";
+    echo "Reserva agregada exitosamente en memoria.\n";
+
+    // Aquí, después de agregar la reserva en memoria, también la insertamos en la base de datos
+    $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
+    $pdo = $conexion->obtenerConexion();
+
+    // Preparar la consulta SQL
+    $stmt = $pdo->prepare("INSERT INTO reservas (numero_reserva, fecha_inicio, fecha_fin, cliente_dni, cabana_numero) VALUES (?, ?, ?, ?, ?)");
+
+    // Ejecutar la consulta con los datos de la reserva
+    $stmt->execute([$reserva->getNumero(), $fechaInicio, $fechaFin, $dniCliente, $numeroCabana]);
+    echo "Reserva agregada exitosamente en la base de datos.\n";
 }
 
 // Función para modificar una reserva
@@ -216,14 +227,26 @@ function eliminarReserva()
         $opcion = strtoupper(trim(fgets(STDIN)));
 
         if ($opcion === 'S') {
-            // Eliminar la reserva de la lista
+            // Eliminar la reserva de la lista en memoria
             $key = array_search($reservaEncontrada, $reservas);
             if ($key !== false) {
                 unset($reservas[$key]);
-                echo "La reserva fue eliminada exitosamente.\n";
+                echo "La reserva fue eliminada exitosamente en memoria.\n";
             } else {
-                echo "No se pudo eliminar la reserva.\n";
+                echo "No se pudo eliminar la reserva en memoria.\n";
             }
+
+            // Eliminar la reserva de la base de datos
+            $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
+            $pdo = $conexion->obtenerConexion();
+
+            // Preparar la consulta SQL de eliminación
+            $stmt = $pdo->prepare("DELETE FROM reservas WHERE numero = ?");
+
+            // Ejecutar la consulta
+            $stmt->execute([$numeroReserva]);
+
+            echo "La reserva fue eliminada exitosamente en la base de datos.\n";
         } else {
             echo "La eliminación ha sido cancelada.\n";
         }
@@ -253,17 +276,25 @@ function listarReservas()
             echo "Fecha de Fin: " . $reserva->getFechaFin() . "\n";
 
             echo "Cliente:\n";
-            echo "  DNI: " . $cliente->getDni() . "\n";
-            echo "  Nombre: " . $cliente->getNombre() . "\n";
-            echo "  Dirección: " . $cliente->getDireccion() . "\n";
-            echo "  Teléfono: " . $cliente->getTelefono() . "\n";
-            echo "  Email: " . $cliente->getEmail() . "\n";
+            if (is_object($cliente)) {
+                echo "  DNI: " . $cliente->getDni() . "\n";
+                echo "  Nombre: " . $cliente->getNombre() . "\n";
+                echo "  Dirección: " . $cliente->getDireccion() . "\n";
+                echo "  Teléfono: " . $cliente->getTelefono() . "\n";
+                echo "  Email: " . $cliente->getEmail() . "\n";
+            } else {
+                echo "  Cliente no disponible\n";
+            }
 
             echo "Cabaña:\n";
-            echo "  Número: " . $cabana->getNumero() . "\n";
-            echo "  Capacidad: " . $cabana->getCapacidad() . "\n";
-            echo "  Descripción: " . $cabana->getDescripcion() . "\n";
-            echo "  Costo Diario: $" . $cabana->getCostoDiario() . "\n";
+            if (is_object($cabana)) {
+                echo "  Número: " . $cabana->getNumero() . "\n";
+                echo "  Capacidad: " . $cabana->getCapacidad() . "\n";
+                echo "  Descripción: " . $cabana->getDescripcion() . "\n";
+                echo "  Costo Diario: $" . $cabana->getCostoDiario() . "\n";
+            } else {
+                echo "  Cabaña no disponible\n";
+            }
 
             echo "Diferencia de Días en la Reserva: " . $reserva->calcularDiferenciaDias() . " días\n";
             echo "Costo Total de la Reserva: $" . $reserva->calcularCostoTotal() . "\n";
@@ -271,8 +302,6 @@ function listarReservas()
         }
     }
 }
-
-// Función para buscar una reserva por número
 function buscarReservaPorNumero($numero)
 {
     global $reservas;
@@ -281,6 +310,30 @@ function buscarReservaPorNumero($numero)
         if ($reserva->getNumero() == $numero) {
             return $reserva;
         }
+    }
+
+    // Si no se encuentra en memoria, buscar en la base de datos
+    $conexion = Conexion::obtenerInstancia(); // Obtener una instancia de la conexión
+    $pdo = $conexion->obtenerConexion();
+
+    $stmt = $pdo->prepare("SELECT * FROM reservas WHERE numero = ?");
+    $stmt->execute([$numero]);
+    $reservaDesdeBD = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($reservaDesdeBD) {
+        // Crear una instancia de Reservas desde los datos de la base de datos
+        $cliente = buscarClientePorDNI($reservaDesdeBD['dni_cliente']);
+        $cabana = buscarCabanaPorNumero($reservaDesdeBD['numero_cabana']);
+
+        $reserva = new Reservas(
+            $reservaDesdeBD['numero'],
+            $reservaDesdeBD['fecha_inicio'],
+            $reservaDesdeBD['fecha_fin'],
+            $cliente,
+            $cabana
+        );
+
+        return $reserva;
     }
     return null;
 }
