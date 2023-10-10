@@ -2,6 +2,31 @@
 
 require_once 'Cabanas.php'; 
 
+// Función para cargar cabañas desde la base de datos
+function cargarCabanasDesdeBD()
+{
+    global $cabanas;
+
+    // Limpia el arreglo de cabañas existente
+    $cabanas = [];
+
+    // Realiza la consulta para cargar cabañas desde la base de datos
+    $conexion = Conexion::obtenerInstancia();
+    $pdo = $conexion->obtenerConexion();
+    $stmt = $pdo->query("SELECT * FROM cabanas");
+
+    // Recorre los resultados y crea instancias de Cabaña
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $cabana = new Cabanas(
+            $row['numero'],
+            $row['capacidad'],
+            $row['descripcion'],
+            $row['costo_diario']
+        );
+        $cabanas[] = $cabana;
+    }
+}
+
 // Menú de Gestionar Cabañas
 function menuCabanas()
 {
@@ -44,7 +69,7 @@ function menuCabanas()
 // Función para dar de alta una cabaña
 function altaCabana()
 {
-    global $cabanas;
+    global $cabanas; // Esto es para mantener la lógica existente
 
     echo "\nAlta de Cabaña\n";
 
@@ -78,8 +103,22 @@ function altaCabana()
     $cabana = new Cabanas($numero, $capacidad, $descripcion, $costoDiario);
     $cabanas[] = $cabana;
 
-    echo "La cabaña nº " . $cabana->getNumero() . " fue agregada exitosamente.\n";
+    echo "Cabaña agregada exitosamente en memoria.\n";
+
+    // Aquí, después de agregar la cabaña en memoria, también la insertamos en la base de datos
+    $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
+    $pdo = $conexion->obtenerConexion();
+
+    // Preparar la consulta SQL
+    $stmt = $pdo->prepare("INSERT INTO cabanas (numero, capacidad, descripcion, costo_diario) VALUES (?, ?, ?, ?)");
+
+    // Ejecutar la consulta con los datos de la cabaña
+    $stmt->execute([$numero, $capacidad, $descripcion, $costoDiario]);
+
+    echo "Cabaña agregada exitosamente en la base de datos.\n";
 }
+
+// Función para modificar una cabaña
 // Función para modificar una cabaña
 function modificarCabana()
 {
@@ -125,7 +164,19 @@ function modificarCabana()
             $cabanaEncontrada->setCostoDiario(floatval($nuevoCostoDiario));
         }
 
-        echo "Cabaña modificada exitosamente.\n";
+        echo "Cabaña modificada exitosamente en memoria.\n";
+
+        // Aquí, después de modificar la cabaña en memoria, también actualizamos los datos en la base de datos
+        $conexion = Conexion::obtenerInstancia(); // Obtener una instancia de la conexión
+        $pdo = $conexion->obtenerConexion();
+
+        // Preparar la consulta SQL de actualización
+        $stmt = $pdo->prepare("UPDATE cabanas SET capacidad=?, descripcion=?, costo_diario=? WHERE numero=?");
+
+        // Ejecutar la consulta con los nuevos datos de la cabaña
+        $stmt->execute([$nuevaCapacidad, $nuevaDescripcion, $nuevoCostoDiario, $numero]);
+
+        echo "Cabaña modificada exitosamente en la base de datos.\n";
     } else {
         echo "No se encontró una cabaña con ese número.\n";
     }
@@ -158,14 +209,26 @@ function eliminarCabana()
         $opcion = strtoupper(trim(fgets(STDIN)));
 
         if ($opcion === 'S') {
-            // Eliminar la cabaña de la lista
+            // Eliminar la cabaña de la lista en memoria
             $key = array_search($cabanaEncontrada, $cabanas);
             if ($key !== false) {
                 unset($cabanas[$key]);
-                echo "La cabaña fue eliminada exitosamente.\n";
+                echo "La cabaña fue eliminada exitosamente en memoria.\n";
             } else {
-                echo "No se pudo eliminar la cabaña.\n";
+                echo "No se pudo eliminar la cabaña en memoria.\n";
             }
+
+            // Aquí, después de eliminar la cabaña en memoria, también eliminamos los datos de la base de datos
+            $conexion = Conexion::obtenerInstancia(); // Obtener una instancia de la conexión
+            $pdo = $conexion->obtenerConexion();
+
+            // Preparar la consulta SQL de eliminación
+            $stmt = $pdo->prepare("DELETE FROM cabanas WHERE numero=?");
+
+            // Ejecutar la consulta para eliminar la cabaña de la base de datos
+            $stmt->execute([$numero]);
+
+            echo "La cabaña fue eliminada exitosamente en la base de datos.\n";
         } else {
             echo "La eliminación ha sido cancelada.\n";
         }
@@ -179,30 +242,77 @@ function listarCabanas()
 {
     global $cabanas;
 
+    echo "=================================";
     echo "\nListado de Cabañas\n";
+    echo "=================================\n";
 
+    // Listar cabañas en memoria
     if (empty($cabanas)) {
-        echo "No hay cabañas registradas en el sistema.\n";
+        echo "No hay cabañas registradas en memoria.\n";
     } else {
+        echo "Cabañas en memoria:\n";
         foreach ($cabanas as $cabana) {
             echo "Número: " . $cabana->getNumero() . "\n";
             echo "Capacidad: " . $cabana->getCapacidad() . "\n";
             echo "Descripción: " . $cabana->getDescripcion() . "\n";
             echo "Costo Diario: $" . $cabana->getCostoDiario() . "\n";
-            echo "---------------------------\n";
+            echo "---------------------------";
         }
     }
+
+    // Listar cabañas desde la base de datos
+    $conexion = Conexion::obtenerInstancia(); // Obtener una instancia de la conexión
+    $pdo = $conexion->obtenerConexion();
+
+    $stmt = $pdo->query("SELECT * FROM cabanas");
+
+    $cabanasDesdeBD = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!empty($cabanasDesdeBD)) {
+        echo "Cabañas en la base de datos:\n";
+        foreach ($cabanasDesdeBD as $cabanaDesdeBD) {
+            echo "Número: " . $cabanaDesdeBD['numero'] . "\n";
+            echo "Capacidad: " . $cabanaDesdeBD['capacidad'] . "\n";
+            echo "Descripción: " . $cabanaDesdeBD['descripcion'] . "\n";
+            echo "Costo Diario: $" . $cabanaDesdeBD['costo_diario'] . "\n";
+            echo "---------------------------\n";
+        }
+    } else {
+        echo "No hay cabañas registradas en la base de datos.\n";
+    }
 }
+
 // Función para buscar una cabaña por número
 function buscarCabanaPorNumero($numero)
 {
     global $cabanas;
 
+    // Primero, buscar en la memoria
     foreach ($cabanas as $cabana) {
         if ($cabana->getNumero() == $numero) {
             return $cabana;
         }
     }
+
+    // Si no se encuentra en memoria, buscar en la base de datos
+    $conexion = Conexion::obtenerInstancia(); // Obtener una instancia de la conexión
+    $pdo = $conexion->obtenerConexion();
+
+    $stmt = $pdo->prepare("SELECT * FROM cabanas WHERE numero = ?");
+    $stmt->execute([$numero]);
+    $cabanaDesdeBD = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($cabanaDesdeBD) {
+        // Crear una instancia de Cabanas desde los datos de la base de datos
+        $cabana = new Cabanas(
+            $cabanaDesdeBD['numero'],
+            $cabanaDesdeBD['capacidad'],
+            $cabanaDesdeBD['descripcion'],
+            $cabanaDesdeBD['costo_diario']
+        );
+        return $cabana;
+    }
+
     return null;
 }
 ?>

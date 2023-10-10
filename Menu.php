@@ -19,12 +19,18 @@ echo "Conexión a la base de datos establecida con éxito.\n";
 // Menú principal
 function menuPrincipal()
 {
+    // Cargar datos desde la base de datos
+    cargarClientesDesdeBD();
+    cargarCabanasDesdeBD();
+    cargarReservasDesdeBD();
+
     echo "Bienvenido a CabinManager, su gestor de reservas!\n";
     echo "Menú Principal\n";
     echo "1. Gestionar Clientes\n";
     echo "2. Gestionar Cabañas\n";
     echo "3. Gestionar Reservas\n";
-    echo "4. Listados\n";
+    echo "4. Buscar Clientes por Nombre\n";
+    echo "5. Listados\n";
     echo "0. Salir\n";
 
     $opcion = leerOpcion("Seleccione una opción: ");
@@ -43,6 +49,10 @@ function menuPrincipal()
             menuReservas();
             break;
         case 4:
+            buscarClientesPorNombre();
+            menuPrincipal();
+            break;
+        case 5:
             require_once './Submenues/submenuListados.php';
             menuListados();
             break;
@@ -64,4 +74,3 @@ function leerOpcion($mensaje)
 }
 // Iniciar el programa
 menuPrincipal();
-?>

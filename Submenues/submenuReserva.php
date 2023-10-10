@@ -3,6 +3,32 @@ require_once 'Cabanas.php';
 require_once 'Clientes.php';
 require_once 'Reservas.php';
 
+// Función para cargar reservas desde la base de datos
+function cargarReservasDesdeBD()
+{
+    global $reservas;
+
+    // Limpia el arreglo de reservas existente
+    $reservas = [];
+
+    // Realiza la consulta para cargar reservas desde la base de datos
+    $conexion = Conexion::obtenerInstancia();
+    $pdo = $conexion->obtenerConexion();
+    $stmt = $pdo->query("SELECT * FROM reservas");
+
+    // Recorre los resultados y crea instancias de Reserva
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $reserva = new Reservas(
+            $row['numero_reserva'],
+            $row['dni_cliente'],
+            $row['numero_cabana'],
+            $row['fecha_inicio'],
+            $row['fecha_fin']
+        );
+        $reservas[] = $reserva;
+    }
+}
+
 // Menú de Gestionar Reservas
 function menuReservas()
 {
@@ -206,7 +232,9 @@ function listarReservas()
 {
     global $reservas, $clientes, $cabanas;
 
+    echo "=================================";
     echo "\nListado de Reservas\n";
+    echo "=================================\n";
 
     if (empty($reservas)) {
         echo "No hay reservas registradas en el sistema.\n";

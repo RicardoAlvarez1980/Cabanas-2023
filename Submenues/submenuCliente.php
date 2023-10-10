@@ -2,7 +2,32 @@
 
 require_once 'Clientes.php';
 
-// Menú de Gestionar Clientes
+
+function cargarClientesDesdeBD()
+{
+    global $clientes;
+
+    // Limpia el arreglo de clientes existente
+    $clientes = [];
+
+    // Realiza la consulta para cargar clientes desde la base de datos
+    $conexion = Conexion::obtenerInstancia();
+    $pdo = $conexion->obtenerConexion();
+    $stmt = $pdo->query("SELECT * FROM clientes");
+
+    // Recorre los resultados y crea instancias de Cliente
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $cliente = new Clientes(
+            $row['dni'],
+            $row['nombre'],
+            $row['direccion'],
+            $row['telefono'],
+            $row['email']
+        );
+        $clientes[] = $cliente;
+    }
+}
+
 function menuClientes()
 {
     echo "\nMenú de Gestionar Clientes\n";
@@ -80,10 +105,20 @@ function altaCliente()
     $cliente = new Clientes($dni, $nombre, $direccion, $telefono, $email);
     $clientes[] = $cliente;
 
-    echo "Cliente agregado exitosamente.\n";
+    echo "Cliente agregado exitosamente en memoria.\n";
+
+    // Aquí, después de agregar el cliente en memoria, también lo insertamos en la base de datos
+    $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
+    $pdo = $conexion->obtenerConexion();
+
+    // Preparar la consulta SQL
+    $stmt = $pdo->prepare("INSERT INTO clientes (dni, nombre, direccion, telefono, email) VALUES (?, ?, ?, ?, ?)");
+
+    // Ejecutar la consulta con los datos del cliente
+    $stmt->execute([$dni, $nombre, $direccion, $telefono, $email]);
+    echo "Cliente agregado exitosamente en la base de datos.\n";
 }
 
-// Función para modificar un cliente
 function modificarCliente()
 {
     global $clientes;
@@ -134,14 +169,25 @@ function modificarCliente()
             $clienteEncontrado->setEmail($nuevoEmail);
         }
 
-        echo "Cliente modificado exitosamente.\n";
+        echo "Cliente modificado exitosamente en memoria.\n";
+
+        // Aquí, después de modificar el cliente en memoria, también actualizamos los datos en la base de datos
+        $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
+        $pdo = $conexion->obtenerConexion();
+
+        // Preparar la consulta SQL de actualización
+        $stmt = $pdo->prepare("UPDATE clientes SET nombre=?, direccion=?, telefono=?, email=? WHERE dni=?");
+
+        // Ejecutar la consulta con los nuevos datos del cliente
+        $stmt->execute([$nuevoNombre, $nuevaDireccion, $nuevoTelefono, $nuevoEmail, $dni]);
+
+        echo "Cliente modificado exitosamente en la base de datos.\n";
     } else {
         echo "No se encontró un cliente con ese DNI.\n";
     }
 }
 
 
-// Función para eliminar un cliente
 function eliminarCliente()
 {
     global $clientes;
@@ -169,14 +215,26 @@ function eliminarCliente()
         $opcion = strtoupper(trim(fgets(STDIN)));
 
         if ($opcion === 'S') {
-            // Eliminar el cliente de la lista
+            // Eliminar el cliente de la lista en memoria
             $key = array_search($clienteEncontrado, $clientes);
             if ($key !== false) {
                 unset($clientes[$key]);
-                echo "El cliente fue eliminado exitosamente.\n";
+                echo "El cliente fue eliminado exitosamente en memoria.\n";
             } else {
-                echo "No se pudo eliminar el cliente.\n";
+                echo "No se pudo eliminar el cliente en memoria.\n";
             }
+
+            // Eliminar el cliente de la base de datos
+            $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
+            $pdo = $conexion->obtenerConexion();
+
+            // Preparar la consulta SQL de eliminación
+            $stmt = $pdo->prepare("DELETE FROM clientes WHERE dni=?");
+
+            // Ejecutar la consulta
+            $stmt->execute([$dni]);
+
+            echo "El cliente fue eliminado exitosamente en la base de datos.\n";
         } else {
             echo "La eliminación ha sido cancelada.\n";
         }
@@ -185,16 +243,17 @@ function eliminarCliente()
     }
 }
 
-// Función para listar clientes
 function listarClientes()
 {
     global $clientes;
-
+    echo "=================================";
     echo "\nListado de Clientes\n";
-
+    echo "=================================\n";
+    // Listar clientes en memoria
     if (empty($clientes)) {
-        echo "No hay clientes registrados en el sistema.\n";
+        echo "No hay clientes registrados en la memoria.\n";
     } else {
+        echo "Clientes en memoria:\n";
         foreach ($clientes as $cliente) {
             echo "DNI: " . $cliente->getDni() . "\n";
             echo "Nombre: " . $cliente->getNombre() . "\n";
@@ -204,18 +263,123 @@ function listarClientes()
             echo "---------------------------\n";
         }
     }
-}
 
+    // Listar clientes desde la base de datos
+    $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
+    $pdo = $conexion->obtenerConexion();
+
+    $stmt = $pdo->query("SELECT * FROM clientes");
+
+    $clientesDesdeBD = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (empty($clientesDesdeBD)) {
+        echo "No hay clientes registrados en la base de datos.\n";
+    } else {
+        echo "Clientes en la base de datos:\n";
+        foreach ($clientesDesdeBD as $cliente) {
+            echo "DNI: " . $cliente['dni'] . "\n";
+            echo "Nombre: " . $cliente['nombre'] . "\n";
+            echo "Dirección: " . $cliente['direccion'] . "\n";
+            echo "Teléfono: " . $cliente['telefono'] . "\n";
+            echo "Email: " . $cliente['email'] . "\n";
+            echo "---------------------------\n";
+        }
+    }
+}
 
 // Función para buscar un cliente por DNI
 function buscarClientePorDNI($dni)
 {
     global $clientes;
 
+    // Buscar cliente en memoria
     foreach ($clientes as $cliente) {
         if ($cliente->getDNI() == $dni) {
             return $cliente;
         }
     }
+
+    // Buscar cliente en la base de datos
+    $conexion = Conexion::obtenerInstancia(); // Obtener una instancia de la conexión
+    $pdo = $conexion->obtenerConexion();
+
+    $stmt = $pdo->prepare("SELECT * FROM clientes WHERE dni = :dni");
+    $stmt->bindParam(':dni', $dni);
+    $stmt->execute();
+
+    $clienteDesdeBD = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($clienteDesdeBD) {
+        // Crear una instancia de Cliente desde los datos de la base de datos
+        $cliente = new Clientes(
+            $clienteDesdeBD['dni'],
+            $clienteDesdeBD['nombre'],
+            $clienteDesdeBD['direccion'],
+            $clienteDesdeBD['telefono'],
+            $clienteDesdeBD['email']
+        );
+        return $cliente;
+    }
     return null;
+}
+// Función para buscar clientes por nombre o parte del nombre
+function buscarClientesPorNombre()
+{
+    echo "Búsqueda de Clientes por Nombre\n";
+
+    echo "Ingrese el nombre o parte del nombre a buscar: ";
+    $nombre = trim(fgets(STDIN));
+
+    // Buscar clientes en la base de datos
+    $conexion = Conexion::obtenerInstancia(); // Obtener una instancia de la conexión
+    $pdo = $conexion->obtenerConexion();
+
+    $stmt = $pdo->prepare("SELECT * FROM clientes WHERE LOWER(nombre) LIKE :nombre");
+    $stmt->bindValue(':nombre', '%' . strtolower($nombre) . '%', PDO::PARAM_STR);
+    $stmt->execute();
+
+    $resultados = [];
+
+    while ($clienteDesdeBD = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Crear una instancia de Cliente desde los datos de la base de datos
+        $cliente = new Clientes(
+            $clienteDesdeBD['dni'],
+            $clienteDesdeBD['nombre'],
+            $clienteDesdeBD['direccion'],
+            $clienteDesdeBD['telefono'],
+            $clienteDesdeBD['email']
+        );
+        $resultados[] = $cliente;
+    }
+
+    if (empty($resultados)) {
+        echo "No se encontraron clientes en la base de datos que coincidan con la búsqueda.\n";
+    } else {
+        echo "Clientes encontrados en la base de datos:\n";
+        foreach ($resultados as $cliente) {
+            echo "---------------------------\n";
+            echo "DNI: " . $cliente->getDni() . "\n";
+            echo "Nombre: " . $cliente->getNombre() . "\n";
+            echo "Dirección: " . $cliente->getDireccion() . "\n";
+            echo "Teléfono: " . $cliente->getTelefono() . "\n";
+            echo "Email: " . $cliente->getEmail() . "\n";
+            echo "---------------------------\n";
+        }
+    }
+
+    echo "Clientes en memoria:\n";
+    global $clientes;
+    if (empty($clientes)) {
+        echo "No hay clientes en memoria.\n";
+    } else {
+        foreach ($clientes as $cliente) {
+            echo "---------------------------\n";
+            echo "DNI: " . $cliente->getDni() . "\n";
+            echo "Nombre: " . $cliente->getNombre() . "\n";
+            echo "Dirección: " . $cliente->getDireccion() . "\n";
+            echo "Teléfono: " . $cliente->getTelefono() . "\n";
+            echo "Email: " . $cliente->getEmail() . "\n";
+            echo "---------------------------\n";
+        }
+    }
 }
