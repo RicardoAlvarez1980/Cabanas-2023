@@ -4,6 +4,7 @@ require_once 'Clientes.php';
 require_once 'Reservas.php';
 
 // Función para cargar reservas desde la base de datos
+// Función para cargar reservas desde la base de datos
 function cargarReservasDesdeBD()
 {
     global $reservas;
@@ -14,20 +15,39 @@ function cargarReservasDesdeBD()
     // Realiza la consulta para cargar reservas desde la base de datos
     $conexion = Conexion::obtenerInstancia();
     $pdo = $conexion->obtenerConexion();
-    $stmt = $pdo->query("SELECT * FROM reservas");
+    $stmt = $pdo->query("SELECT R.*, C.*, Ca.* FROM reservas R
+                        INNER JOIN clientes C ON R.cliente_dni = C.dni
+                        INNER JOIN cabanas Ca ON R.cabana_numero = Ca.numero");
 
-    // Recorre los resultados y crea instancias de Reserva
+    // Recorre los resultados y crea instancias de Reserva con detalles completos
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $cliente = new Clientes(
+            $row['dni'],
+            $row['nombre'],
+            $row['direccion'],
+            $row['telefono'],
+            $row['email']
+        );
+
+        $cabana = new Cabanas(
+            $row['numero'],
+            $row['capacidad'],
+            $row['descripcion'],
+            $row['costo_diario']
+        );
+
         $reserva = new Reservas(
             $row['numero_reserva'],
             $row['fecha_inicio'],
             $row['fecha_fin'],
-            $row['cliente_dni'],
-            $row['cabana_numero']
+            $cliente,
+            $cabana
         );
+
         $reservas[] = $reserva;
     }
 }
+
 
 // Menú de Gestionar Reservas
 function menuReservas()
@@ -35,7 +55,7 @@ function menuReservas()
     echo "=================================";
     echo "\nMenú de Gestionar Reservas\n";
     echo "=================================\n";
-    
+
     echo "1. Alta de Reserva\n";
     echo "2. Modificar Reserva\n";
     echo "3. Eliminar Reserva\n";
@@ -71,7 +91,7 @@ function menuReservas()
     }
 }
 // Función para dar de alta una reserva
-function altaReserva()
+function altaReserva_anterior()
 {
     global $reservas, $cabanas, $clientes;
     echo "\nAlta de Reserva\n";
@@ -145,6 +165,56 @@ function altaReserva()
     $stmt->execute([$reserva->getNumero(), $fechaInicio, $fechaFin, $dniCliente, $numeroCabana]);
     echo "Reserva agregada exitosamente en la base de datos.\n";
 }
+
+function altaReserva()
+{
+    global $reservas, $cabanas, $clientes;
+    echo "\nAlta de Reserva\n";
+
+    // Solicitar datos de la reserva al usuario
+    echo "Ingrese el DNI del cliente que realiza la reserva: ";
+    $dniCliente = trim(fgets(STDIN));
+
+    // Buscar el cliente por su DNI
+    $clienteSeleccionado = buscarClientePorDNI($dniCliente);
+
+    if (!$clienteSeleccionado) {
+        echo "No se encontró un cliente con ese DNI. La reserva no se puede completar.\n";
+        return;
+    }
+
+    // Mostrar lista de cabañas disponibles
+    echo "Cabañas Disponibles:\n";
+    foreach ($cabanas as $cabana) {
+        echo "Número: " . $cabana->getNumero() . "\n";
+        echo "---------------------------\n";
+    }
+    echo "Ingrese el número de la cabaña a reservar: ";
+    $numeroCabana = trim(fgets(STDIN));
+
+    // Buscar la cabaña por su número
+    $cabanaSeleccionada = buscarCabanaPorNumero($numeroCabana);
+
+    if (!$cabanaSeleccionada) {
+        echo "No se encontró una cabaña con ese número. La reserva no se puede completar.\n";
+        return;
+    }
+
+    echo "Ingrese la fecha de inicio de la reserva (formato YYYY-MM-DD): ";
+    $fechaInicio = trim(fgets(STDIN));
+    echo "Ingrese la fecha de fin de la reserva (formato YYYY-MM-DD): ";
+    $fechaFin = trim(fgets(STDIN));
+
+    // Crear una nueva instancia de Reservas con los datos proporcionados
+    $reserva = new Reservas(count($reservas) + 1, $fechaInicio, $fechaFin, $clienteSeleccionado, $cabanaSeleccionada);
+    $reservas[] = $reserva;
+
+    // Mensaje de confirmación
+    echo "\nReserva agregada exitosamente.\n";
+}
+
+
+
 
 // Función para modificar una reserva
 function modificarReserva()
@@ -258,43 +328,35 @@ function eliminarReserva()
 // Función para listar reservas con información completa de cliente y cabaña
 function listarReservas()
 {
-    global $reservas, $clientes, $cabanas;
+    global $reservas;
 
-    echo "=================================";
-    echo "\nListado de Reservas\n";
-    echo "=================================\n";
+    cargarReservasDesdeBD(); // Cargar reservas desde la base de datos
+
+    echo "\nListado de Reservas\n----------------------------\n";
 
     if (empty($reservas)) {
         echo "No hay reservas registradas en el sistema.\n";
     } else {
         foreach ($reservas as $reserva) {
-            $cliente = $reserva->getCliente();
-            $cabana = $reserva->getCabana();
-
             echo "Número de Reserva: " . $reserva->getNumero() . "\n";
             echo "Fecha de Inicio: " . $reserva->getFechaInicio() . "\n";
             echo "Fecha de Fin: " . $reserva->getFechaFin() . "\n";
 
+            $cliente = $reserva->getCliente();
+            $cabana = $reserva->getCabana();
+
             echo "Cliente:\n";
-            if (is_object($cliente)) {
-                echo "  DNI: " . $cliente->getDni() . "\n";
-                echo "  Nombre: " . $cliente->getNombre() . "\n";
-                echo "  Dirección: " . $cliente->getDireccion() . "\n";
-                echo "  Teléfono: " . $cliente->getTelefono() . "\n";
-                echo "  Email: " . $cliente->getEmail() . "\n";
-            } else {
-                echo "  Cliente no disponible\n";
-            }
+            echo "  DNI: " . $cliente->getDni() . "\n";
+            echo "  Nombre: " . $cliente->getNombre() . "\n";
+            echo "  Dirección: " . $cliente->getDireccion() . "\n";
+            echo "  Teléfono: " . $cliente->getTelefono() . "\n";
+            echo "  Email: " . $cliente->getEmail() . "\n";
 
             echo "Cabaña:\n";
-            if (is_object($cabana)) {
-                echo "  Número: " . $cabana->getNumero() . "\n";
-                echo "  Capacidad: " . $cabana->getCapacidad() . "\n";
-                echo "  Descripción: " . $cabana->getDescripcion() . "\n";
-                echo "  Costo Diario: $" . $cabana->getCostoDiario() . "\n";
-            } else {
-                echo "  Cabaña no disponible\n";
-            }
+            echo "  Número: " . $cabana->getNumero() . "\n";
+            echo "  Capacidad: " . $cabana->getCapacidad() . "\n";
+            echo "  Descripción: " . $cabana->getDescripcion() . "\n";
+            echo "  Costo Diario: $" . $cabana->getCostoDiario() . "\n";
 
             echo "Diferencia de Días en la Reserva: " . $reserva->calcularDiferenciaDias() . " días\n";
             echo "Costo Total de la Reserva: $" . $reserva->calcularCostoTotal() . "\n";
@@ -302,6 +364,15 @@ function listarReservas()
         }
     }
 }
+
+
+
+
+
+
+
+
+
 function buscarReservaPorNumero($numero)
 {
     global $reservas;

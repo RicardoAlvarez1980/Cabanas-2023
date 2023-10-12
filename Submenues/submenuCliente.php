@@ -28,6 +28,7 @@ function cargarClientesDesdeBD()
     }
 }
 
+
 function menuClientes()
 {
     echo "=================================";
