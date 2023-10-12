@@ -161,7 +161,7 @@ function modificarCliente()
         echo "Ingrese el nuevo email del cliente (deje en blanco para mantener el valor actual): ";
         $nuevoEmail = trim(fgets(STDIN));
 
-        // Actualizar los campos del cliente si se ingresan nuevos valores
+        // Actualizar los campos del cliente en memoria si se ingresan nuevos valores
         if (!empty($nuevoNombre)) {
             $clienteEncontrado->setNombre($nuevoNombre);
         }
@@ -184,14 +184,22 @@ function modificarCliente()
         // Preparar la consulta SQL de actualización
         $stmt = $pdo->prepare("UPDATE clientes SET nombre=?, direccion=?, telefono=?, email=? WHERE dni=?");
 
-        // Ejecutar la consulta con los nuevos datos del cliente
-        $stmt->execute([$nuevoNombre, $nuevaDireccion, $nuevoTelefono, $nuevoEmail, $dni]);
+        // Ejecutar la consulta con los nuevos datos del cliente o mantener los valores actuales si están en blanco
+        $stmt->execute([
+            !empty($nuevoNombre) ? $nuevoNombre : $clienteEncontrado->getNombre(),
+            !empty($nuevaDireccion) ? $nuevaDireccion : $clienteEncontrado->getDireccion(),
+            !empty($nuevoTelefono) ? $nuevoTelefono : $clienteEncontrado->getTelefono(),
+            !empty($nuevoEmail) ? $nuevoEmail : $clienteEncontrado->getEmail(),
+            $dni
+        ]);
 
         echo "Cliente modificado exitosamente en la base de datos.\n";
     } else {
         echo "No se encontró un cliente con ese DNI.\n";
     }
 }
+
+
 
 
 function eliminarCliente()

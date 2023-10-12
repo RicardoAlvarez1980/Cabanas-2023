@@ -284,7 +284,7 @@ function listarCabanas()
             echo "Capacidad: " . $cabanaDesdeBD['capacidad'] . "\n";
             echo "Descripción: " . $cabanaDesdeBD['descripcion'] . "\n";
             echo "Costo Diario: $" . $cabanaDesdeBD['costo_diario'] . "\n";
-            echo "-------------------------------";
+            echo "-------------------------------\n";
         }
     } else {
         echo "No hay cabañas registradas en la base de datos.\n";

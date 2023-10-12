@@ -3,7 +3,7 @@ require_once 'Cabanas.php';
 require_once 'Clientes.php';
 require_once 'Reservas.php';
 
-// Función para cargar reservas desde la base de datos
+
 // Función para cargar reservas desde la base de datos
 function cargarReservasDesdeBD()
 {
@@ -172,6 +172,15 @@ function altaReserva()
     echo "\nAlta de Reserva\n";
 
     // Solicitar datos de la reserva al usuario
+    echo "Clientes Disponibles:\n";
+    foreach ($clientes as $cliente) {
+        echo "DNI: " . $cliente->getDni() . "\n";
+        echo "Nombre: " . $cliente->getNombre() . "\n";
+        echo "Dirección: " . $cliente->getDireccion() . "\n";
+        echo "Teléfono: " . $cliente->getTelefono() . "\n";
+        echo "Email: " . $cliente->getEmail() . "\n";
+        echo "---------------------------\n";
+    }
     echo "Ingrese el DNI del cliente que realiza la reserva: ";
     $dniCliente = trim(fgets(STDIN));
 
@@ -183,10 +192,13 @@ function altaReserva()
         return;
     }
 
-    // Mostrar lista de cabañas disponibles
+    // Mostrar detalles de las cabañas disponibles
     echo "Cabañas Disponibles:\n";
     foreach ($cabanas as $cabana) {
         echo "Número: " . $cabana->getNumero() . "\n";
+        echo "Capacidad: " . $cabana->getCapacidad() . "\n";
+        echo "Descripción: " . $cabana->getDescripcion() . "\n";
+        echo "Costo Diario: $" . $cabana->getCostoDiario() . "\n";
         echo "---------------------------\n";
     }
     echo "Ingrese el número de la cabaña a reservar: ";
@@ -209,9 +221,20 @@ function altaReserva()
     $reserva = new Reservas(count($reservas) + 1, $fechaInicio, $fechaFin, $clienteSeleccionado, $cabanaSeleccionada);
     $reservas[] = $reserva;
 
-    // Mensaje de confirmación
-    echo "\nReserva agregada exitosamente.\n";
+    // Aquí, después de agregar la reserva en memoria, también la insertamos en la base de datos
+    $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
+    $pdo = $conexion->obtenerConexion();
+
+    // Preparar la consulta SQL para insertar la reserva en la base de datos
+    $stmt = $pdo->prepare("INSERT INTO reservas (fecha_inicio, fecha_fin, cliente_dni, cabana_numero) VALUES (?, ?, ?, ?)");
+
+    // Ejecutar la consulta con los datos de la reserva
+    $stmt->execute([$fechaInicio, $fechaFin, $dniCliente, $numeroCabana]);
+
+    echo "Reserva agregada exitosamente.\n";
 }
+
+
 
 
 
@@ -387,7 +410,7 @@ function buscarReservaPorNumero($numero)
     $conexion = Conexion::obtenerInstancia(); // Obtener una instancia de la conexión
     $pdo = $conexion->obtenerConexion();
 
-    $stmt = $pdo->prepare("SELECT * FROM reservas WHERE numero = ?");
+    $stmt = $pdo->prepare("SELECT * FROM reservas WHERE numero_reserva = ?");
     $stmt->execute([$numero]);
     $reservaDesdeBD = $stmt->fetch(PDO::FETCH_ASSOC);
 
