@@ -3,7 +3,6 @@ require_once 'Cabanas.php';
 require_once 'Clientes.php';
 require_once 'Reservas.php';
 
-
 // Función para cargar reservas desde la base de datos
 function cargarReservasDesdeBD()
 {
@@ -47,8 +46,6 @@ function cargarReservasDesdeBD()
         $reservas[] = $reserva;
     }
 }
-
-
 // Menú de Gestionar Reservas
 function menuReservas()
 {
@@ -142,7 +139,6 @@ function altaReserva_anterior()
             break; // Continuar si se encontró la cabaña
         }
     }
-
     echo "Ingrese la fecha de inicio de la reserva (formato YYYY-MM-DD): ";
     $fechaInicio = trim(fgets(STDIN));
     echo "Ingrese la fecha de fin de la reserva (formato YYYY-MM-DD): ";
@@ -172,7 +168,9 @@ function altaReserva()
     echo "\nAlta de Reserva\n";
 
     // Solicitar datos de la reserva al usuario
+    echo "---------------------\n";
     echo "Clientes Disponibles:\n";
+    echo "---------------------\n";
     foreach ($clientes as $cliente) {
         echo "DNI: " . $cliente->getDni() . "\n";
         echo "Nombre: " . $cliente->getNombre() . "\n";
@@ -193,7 +191,9 @@ function altaReserva()
     }
 
     // Mostrar detalles de las cabañas disponibles
+    echo "---------------------\n";
     echo "Cabañas Disponibles:\n";
+    echo "---------------------\n";
     foreach ($cabanas as $cabana) {
         echo "Número: " . $cabana->getNumero() . "\n";
         echo "Capacidad: " . $cabana->getCapacidad() . "\n";
@@ -233,12 +233,6 @@ function altaReserva()
 
     echo "Reserva agregada exitosamente.\n";
 }
-
-
-
-
-
-
 // Función para modificar una reserva
 function modificarReserva()
 {
@@ -279,7 +273,6 @@ function modificarReserva()
         if (!empty($nuevaFechaFin)) {
             $reservaEncontrada->setFechaFin($nuevaFechaFin);
         }
-
         echo "Reserva modificada exitosamente.\n";
     } else {
         echo "No se encontró una reserva con ese número.\n";
@@ -334,7 +327,7 @@ function eliminarReserva()
             $pdo = $conexion->obtenerConexion();
 
             // Preparar la consulta SQL de eliminación
-            $stmt = $pdo->prepare("DELETE FROM reservas WHERE numero = ?");
+            $stmt = $pdo->prepare("DELETE FROM reservas WHERE numero_reserva = ?");
 
             // Ejecutar la consulta
             $stmt->execute([$numeroReserva]);
@@ -355,13 +348,15 @@ function listarReservas()
 
     cargarReservasDesdeBD(); // Cargar reservas desde la base de datos
 
-    echo "\nListado de Reservas\n----------------------------\n";
+    echo "=================================";
+    echo "\nListado de Reservas\n";
+    echo "=================================";
 
     if (empty($reservas)) {
-        echo "No hay reservas registradas en el sistema.\n";
+        echo "\nNo hay reservas registradas en el sistema.\n";
     } else {
         foreach ($reservas as $reserva) {
-            echo "Número de Reserva: " . $reserva->getNumero() . "\n";
+            echo "\nNúmero de Reserva: " . $reserva->getNumero() . "\n";
             echo "Fecha de Inicio: " . $reserva->getFechaInicio() . "\n";
             echo "Fecha de Fin: " . $reserva->getFechaFin() . "\n";
 
@@ -387,15 +382,6 @@ function listarReservas()
         }
     }
 }
-
-
-
-
-
-
-
-
-
 function buscarReservaPorNumero($numero)
 {
     global $reservas;

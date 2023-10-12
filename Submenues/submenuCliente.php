@@ -123,7 +123,7 @@ function altaCliente()
     $stmt->execute([$dni, $nombre, $direccion, $telefono, $email]);
     echo "Cliente agregado exitosamente en la base de datos.\n";
 }
-
+// Función para modificar un cliente
 function modificarCliente()
 {
     global $clientes;
@@ -198,10 +198,7 @@ function modificarCliente()
         echo "No se encontró un cliente con ese DNI.\n";
     }
 }
-
-
-
-
+// Función para eliminar un cliente
 function eliminarCliente()
 {
     global $clientes;
@@ -300,7 +297,7 @@ function listarClientes()
             echo "Dirección: " . $cliente['direccion'] . "\n";
             echo "Teléfono: " . $cliente['telefono'] . "\n";
             echo "Email: " . $cliente['email'] . "\n";
-            echo "---------------------------\n";
+            echo "------------------------------\n";
         }
     }
 }
@@ -357,7 +354,7 @@ function buscarClientesPorNombre()
     $stmt->bindValue(':nombre', '%' . strtolower($nombre) . '%', PDO::PARAM_STR);
     $stmt->execute();
 
-    $resultados = [];
+    $resultadosBD = [];
 
     while ($clienteDesdeBD = $stmt->fetch(PDO::FETCH_ASSOC)) {
         // Crear una instancia de Cliente desde los datos de la base de datos
@@ -368,18 +365,17 @@ function buscarClientesPorNombre()
             $clienteDesdeBD['telefono'],
             $clienteDesdeBD['email']
         );
-        $resultados[] = $cliente;
+        $resultadosBD[] = $cliente;
     }
 
-    if (empty($resultados)) {
+    if (empty($resultadosBD)) {
         echo "No se encontraron clientes en la base de datos que coincidan con la búsqueda.\n";
     } else {
         echo "==============================================";
         echo "\nClientes encontrados en la base de datos:\n";
         echo "==============================================\n";
 
-        foreach ($resultados as $cliente) {
-            echo "---------------------------\n";
+        foreach ($resultadosBD as $cliente) {
             echo "DNI: " . $cliente->getDni() . "\n";
             echo "Nombre: " . $cliente->getNombre() . "\n";
             echo "Dirección: " . $cliente->getDireccion() . "\n";
@@ -388,22 +384,36 @@ function buscarClientesPorNombre()
             echo "---------------------------\n";
         }
     }
+
     echo "=====================================";
     echo "\nClientes encontrados en memoria:\n";
     echo "=====================================\n";
-    
+
     global $clientes;
+
+    $resultadosMemoria = [];
+
     if (empty($clientes)) {
         echo "No hay clientes en memoria.\n";
     } else {
         foreach ($clientes as $cliente) {
-            echo "---------------------------\n";
-            echo "DNI: " . $cliente->getDni() . "\n";
-            echo "Nombre: " . $cliente->getNombre() . "\n";
-            echo "Dirección: " . $cliente->getDireccion() . "\n";
-            echo "Teléfono: " . $cliente->getTelefono() . "\n";
-            echo "Email: " . $cliente->getEmail() . "\n";
-            echo "---------------------------\n";
+            // Realizar la búsqueda en la memoria
+            if (stripos($cliente->getNombre(), $nombre) !== false) {
+                $resultadosMemoria[] = $cliente;
+            }
+        }
+
+        if (empty($resultadosMemoria)) {
+            echo "No se encontraron clientes en memoria que coincidan con la búsqueda.\n";
+        } else {
+            foreach ($resultadosMemoria as $cliente) {
+                echo "DNI: " . $cliente->getDni() . "\n";
+                echo "Nombre: " . $cliente->getNombre() . "\n";
+                echo "Dirección: " . $cliente->getDireccion() . "\n";
+                echo "Teléfono: " . $cliente->getTelefono() . "\n";
+                echo "Email: " . $cliente->getEmail() . "\n";
+                echo "---------------------------\n";
+            }
         }
     }
 }

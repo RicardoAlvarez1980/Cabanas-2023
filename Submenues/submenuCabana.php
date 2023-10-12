@@ -26,7 +26,6 @@ function cargarCabanasDesdeBD()
         $cabanas[] = $cabana;
     }
 }
-
 // Menú de Gestionar Cabañas
 function menuCabanas()
 {
@@ -95,7 +94,6 @@ function altaCabana()
             break; // Continuar si el número de cabaña es único
         }
     }
-
     echo "Ingrese la capacidad de la cabaña: ";
     $capacidad = intval(trim(fgets(STDIN)));
     echo "Ingrese la descripción de la cabaña: ";
@@ -123,10 +121,10 @@ function altaCabana()
 }
 
 // Función para modificar una cabaña
-// Función para modificar una cabaña
 function modificarCabana()
 {
     global $cabanas;
+
     echo "=======================";
     echo "\nModificar Cabaña\n";
     echo "=======================\n";
@@ -145,7 +143,8 @@ function modificarCabana()
     if ($cabanaEncontrada) {
         // Mostrar la información actual de la cabaña
         echo "Información actual de la Cabaña:\n";
-        echo "Número: " . $cabanaEncontrada->getNumero() . "\n";
+        echo "----------------------------------";
+        echo "Cabaña Número: " . $cabanaEncontrada->getNumero() . "\n";
         echo "Capacidad: " . $cabanaEncontrada->getCapacidad() . "\n";
         echo "Descripción: " . $cabanaEncontrada->getDescripcion() . "\n";
         echo "Costo Diario: $" . $cabanaEncontrada->getCostoDiario() . "\n";
@@ -171,22 +170,30 @@ function modificarCabana()
 
         echo "Cabaña modificada exitosamente en memoria.\n";
 
-        // Aquí, después de modificar la cabaña en memoria, también actualizamos los datos en la base de datos
-        $conexion = Conexion::obtenerInstancia(); // Obtener una instancia de la conexión
-        $pdo = $conexion->obtenerConexion();
-
-        // Preparar la consulta SQL de actualización
-        $stmt = $pdo->prepare("UPDATE cabanas SET capacidad=?, descripcion=?, costo_diario=? WHERE numero=?");
-
-        // Ejecutar la consulta con los nuevos datos de la cabaña
-        $stmt->execute([$nuevaCapacidad, $nuevaDescripcion, $nuevoCostoDiario, $numero]);
+        // Actualizar la cabaña en la base de datos
+        actualizarCabanaEnBaseDeDatos($cabanaEncontrada);
 
         echo "Cabaña modificada exitosamente en la base de datos.\n";
     } else {
         echo "No se encontró una cabaña con ese número.\n";
     }
 }
+function actualizarCabanaEnBaseDeDatos($cabana)
+{
+    $conexion = Conexion::obtenerInstancia(); // Obtener una instancia de la conexión
+    $pdo = $conexion->obtenerConexion();
 
+    // Preparar la consulta SQL de actualización
+    $stmt = $pdo->prepare("UPDATE cabanas SET capacidad=?, descripcion=?, costo_diario=? WHERE numero=?");
+
+    // Ejecutar la consulta con los nuevos datos de la cabaña
+    $stmt->execute([
+        $cabana->getCapacidad(),
+        $cabana->getDescripcion(),
+        $cabana->getCostoDiario(),
+        $cabana->getNumero()
+    ]);
+}
 // Función para eliminar una cabaña
 function eliminarCabana()
 {
@@ -206,6 +213,7 @@ function eliminarCabana()
     if ($cabanaEncontrada) {
         // Mostrar la información completa de la cabaña
         echo "Información de la Cabaña:\n";
+        echo "------------------------------\n";
         echo "Número: " . $cabanaEncontrada->getNumero() . "\n";
         echo "Capacidad: " . $cabanaEncontrada->getCapacidad() . "\n";
         echo "Descripción: " . $cabanaEncontrada->getDescripcion() . "\n";
@@ -264,7 +272,7 @@ function listarCabanas()
             echo "Capacidad: " . $cabana->getCapacidad() . "\n";
             echo "Descripción: " . $cabana->getDescripcion() . "\n";
             echo "Costo Diario: $" . $cabana->getCostoDiario() . "\n";
-            echo "-------------------------------";
+            echo "-------------------------------\n";
         }
     }
 
@@ -277,10 +285,10 @@ function listarCabanas()
     $cabanasDesdeBD = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (!empty($cabanasDesdeBD)) {
-        echo "\nCabañas en la base de datos:\n";
+        echo "Cabañas en la base de datos:\n";
         echo "-------------------------------\n";
         foreach ($cabanasDesdeBD as $cabanaDesdeBD) {
-            echo "Número: " . $cabanaDesdeBD['numero'] . "\n";
+            echo "Cabaña Número: " . $cabanaDesdeBD['numero'] . "\n";
             echo "Capacidad: " . $cabanaDesdeBD['capacidad'] . "\n";
             echo "Descripción: " . $cabanaDesdeBD['descripcion'] . "\n";
             echo "Costo Diario: $" . $cabanaDesdeBD['costo_diario'] . "\n";
