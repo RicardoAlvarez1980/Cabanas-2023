@@ -1,14 +1,13 @@
 <?php
+require_once './Submenues/submenuCliente.php';
+require_once './Submenues/submenuCabana.php';
+require_once './Submenues/submenuReserva.php';
+require_once './Conexion.php';
 
 // Arreglos para almacenar cabañas, clientes y reservas
 $cabanas = [];
 $clientes = [];
 $reservas = [];
-
-require_once './Submenues/submenuCliente.php';
-require_once './Submenues/submenuCabana.php';
-require_once './Submenues/submenuReserva.php';
-require_once './Conexion.php';
 
 // Crear una instancia de la clase Conexion para establecer la conexión a la base de datos
 $conexion = Conexion::obtenerInstancia();
