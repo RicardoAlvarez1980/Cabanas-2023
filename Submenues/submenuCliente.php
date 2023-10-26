@@ -28,9 +28,17 @@ function cargarClientesDesdeBD()
     }
 }
 
-
+//Funcion que ejecuta el menú clientes.
 function menuClientes()
 {
+    $opcionesDisponibles = [
+        '1' => 'altaCliente',
+        '2' => 'modificarCliente',
+        '3' => 'eliminarCliente',
+        '4' => 'listarClientes',
+        '0' => 'menuPrincipal',
+    ];
+
     echo "=================================";
     echo "\nMenú de Gestionar Clientes\n";
     echo "=================================\n";
@@ -42,30 +50,12 @@ function menuClientes()
 
     $opcion = leerOpcion("Seleccione una opción: ");
 
-    switch ($opcion) {
-        case 1:
-            altaCliente();
-            menuClientes();
-            break;
-        case 2:
-            modificarCliente();
-            menuClientes();
-            break;
-        case 3:
-            eliminarCliente();
-            menuClientes();
-            break;
-        case 4:
-            listarClientes();
-            menuClientes();
-            break;
-        case 0:
-            menuPrincipal();
-            break;
-        default:
-            echo "Opción inválida. Intente nuevamente.\n";
-            menuClientes();
-            break;
+    if (isset($opcionesDisponibles[$opcion])) {
+        $funcion = $opcionesDisponibles[$opcion];
+        call_user_func($funcion);
+    } else {
+        echo "Opción inválida. Intente nuevamente.\n";
+        menuClientes();
     }
 }
 
