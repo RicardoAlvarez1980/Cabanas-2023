@@ -49,10 +49,17 @@ function cargarReservasDesdeBD()
 // Menú de Gestionar Reservas
 function menuReservas()
 {
+    $opcionesDisponibles = [
+        '1' => 'altaReserva',
+        '2' => 'modificarReserva',
+        '3' => 'eliminarReserva',
+        '4' => 'listarReservas',
+        '0' => 'menuPrincipal',
+    ];
+
     echo "=================================";
     echo "\nMenú de Gestionar Reservas\n";
     echo "=================================\n";
-
     echo "1. Alta de Reserva\n";
     echo "2. Modificar Reserva\n";
     echo "3. Eliminar Reserva\n";
@@ -61,32 +68,15 @@ function menuReservas()
 
     $opcion = leerOpcion("Seleccione una opción: ");
 
-    switch ($opcion) {
-        case 1:
-            altaReserva();
-            menuReservas();
-            break;
-        case 2:
-            modificarReserva();
-            menuReservas();
-            break;
-        case 3:
-            eliminarReserva();
-            menuReservas();
-            break;
-        case 4:
-            listarReservas();
-            menuReservas();
-            break;
-        case 0:
-            menuPrincipal();
-            break;
-        default:
-            echo "Opción inválida. Intente nuevamente.\n";
-            menuReservas();
-            break;
+    if (isset($opcionesDisponibles[$opcion])) {
+        $funcion = $opcionesDisponibles[$opcion];
+        call_user_func($funcion);
+    } else {
+        echo "Opción inválida. Intente nuevamente.\n";
+        menuReservas();
     }
 }
+
 // Función para dar de alta una reserva
 function altaReserva_anterior()
 {
