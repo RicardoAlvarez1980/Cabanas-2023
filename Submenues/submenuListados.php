@@ -15,17 +15,14 @@ function menuListados()
 
     switch ($opcion) {
         case 1:
-            require_once './Submenues/submenuCliente.php'; 
             listarClientes();
             menuListados();
             break;
         case 2:
-            require_once './Submenues/submenuCabana.php';
             listarCabanas();
             menuListados();
             break;
         case 3:
-            require_once './Submenues/submenuReserva.php';
             listarReservas();
             menuListados();
             break;

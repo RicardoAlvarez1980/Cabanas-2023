@@ -1,26 +1,22 @@
 CREATE TABLE Cabanas (
-  numero SERIAL PRIMARY KEY,
-  capacidad INT,
-  descripcion TEXT,
-  costo_diario NUMERIC(10, 2)
+    numero SERIAL PRIMARY KEY,
+    capacidad INTEGER,
+    descripcion TEXT,
+    costoDiario DECIMAL(10, 2)
 );
 
 CREATE TABLE Clientes (
-  dni INT PRIMARY KEY,
-  nombre VARCHAR(255),
-  direccion VARCHAR(255),
-  telefono VARCHAR(15),
-  email VARCHAR(255)
+    id SERIAL PRIMARY KEY,
+    nombre TEXT,
+    direccion TEXT,
+    telefono TEXT,
+    email TEXT
 );
 
 CREATE TABLE Reservas (
-  numero_reserva SERIAL PRIMARY KEY,
-  fecha_inicio DATE,
-  fecha_fin DATE,
-  cliente_dni INT,
-  cabana_numero INT
+    numero SERIAL PRIMARY KEY,
+    cliente_id INTEGER REFERENCES Clientes(id),
+    cabana_numero INTEGER REFERENCES Cabanas(numero),
+    fechaInicio DATE,
+    fechaFin DATE
 );
-
-ALTER TABLE Reservas ADD FOREIGN KEY (cliente_dni) REFERENCES Clientes (dni);
-
-ALTER TABLE Reservas ADD FOREIGN KEY (cabana_numero) REFERENCES Cabanas (numero);

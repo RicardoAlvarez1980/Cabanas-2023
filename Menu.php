@@ -2,6 +2,7 @@
 require_once './Submenues/submenuCliente.php';
 require_once './Submenues/submenuCabana.php';
 require_once './Submenues/submenuReserva.php';
+require_once './Submenues/submenuListados.php';
 require_once './Conexion.php';
 
 // Arreglos para almacenar cabañas, clientes y reservas
@@ -18,10 +19,7 @@ echo "Conexión a la base de datos establecida con éxito.\n";
 // Menú principal
 function menuPrincipal()
 {
-    // Cargar datos desde la base de datos
-    cargarClientesDesdeBD();
-    cargarCabanasDesdeBD();
-    cargarReservasDesdeBD();
+    cargarDatosDesdeBD();
 
     echo "==================================================\n";
     echo "Bienvenido a CabinManager, su gestor de reservas!";
@@ -36,38 +34,40 @@ function menuPrincipal()
     echo "0. Salir\n";
 
     $opcion = leerOpcion("Seleccione una opción: ");
+    
+    $opcionesDisponibles = [
+        '1' => 'menuClientes',
+        '2' => 'menuCabanas',
+        '3' => 'menuReservas',
+        '4' => 'buscarClientesPorNombre',
+        '5' => 'menuListados',
+        '0' => 'salir',
+    ];
 
-    switch ($opcion) {
-        case 1:
-            require_once './Submenues/submenuCliente.php';
-            menuClientes();
-            break;
-        case 2:
-            require_once './Submenues/submenuCabana.php';
-            menuCabanas();
-            break;
-        case 3:
-            require_once './Submenues/submenuReserva.php';
-            menuReservas();
-            break;
-        case 4:
-            buscarClientesPorNombre();
-            menuPrincipal();
-            break;
-        case 5:
-            require_once './Submenues/submenuListados.php';
-            menuListados();
-            break;
-        case 0:
-            echo "Hasta luego.\n";
-            exit;
-        default:
-            echo "Opción inválida. Intente nuevamente.\n";
-            menuPrincipal();
-            break;
+    if (isset($opcionesDisponibles[$opcion])) {
+        $funcion = $opcionesDisponibles[$opcion];
+        call_user_func($funcion);
+        menuPrincipal();
+    } else {
+        echo "Opción inválida. Intente nuevamente.\n";
+        menuPrincipal();
     }
 }
 
+// Cargar datos desde la base de datos
+function cargarDatosDesdeBD()
+{
+    cargarClientesDesdeBD();
+    cargarCabanasDesdeBD();
+    cargarReservasDesdeBD();
+}
+
+// Función para salir del programa
+function salir()
+{
+    echo "Hasta luego.\n";
+    exit;
+}
 // Función para leer una opción del usuario
 function leerOpcion($mensaje)
 {
