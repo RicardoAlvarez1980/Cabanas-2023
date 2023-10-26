@@ -29,9 +29,16 @@ function cargarCabanasDesdeBD()
 // Menú de Gestionar Cabañas
 function menuCabanas()
 {
-    do{
+    $opcionesDisponibles = [
+        '1' => 'altaCabana',
+        '2' => 'modificarCabana',
+        '3' => 'eliminarCabana',
+        '4' => 'listarCabanas',
+        '0' => 'menuPrincipal',
+    ];
+
     echo "=================================";
-    echo "\nMenú de Gestionar Cabañas\n";
+    echo "\nMenú Para Gestionar Cabañas\n";
     echo "=================================\n";
     echo "1. Alta de Cabaña\n";
     echo "2. Modificar Cabaña\n";
@@ -41,27 +48,13 @@ function menuCabanas()
 
     $opcion = leerOpcion("Seleccione una opción: ");
 
-    switch ($opcion) {
-        case 1:
-            altaCabana();
-            break;
-        case 2:
-            modificarCabana();
-            break;
-        case 3:
-            eliminarCabana();
-            break;
-        case 4:
-            listarCabanas();
-            break;
-        case 0:
-            break;
-        default:
-            echo "Opción inválida. Intente nuevamente.\n";
-            break;
-        }
-    } while ($opcion != 0);
-    menuPrincipal();
+    if (isset($opcionesDisponibles[$opcion])) {
+        $funcion = $opcionesDisponibles[$opcion];
+        call_user_func($funcion);
+    } else {
+        echo "Opción inválida. Intente nuevamente.\n";
+        menuClientes();
+    }
 }
 
 // Función para dar de alta una cabaña
