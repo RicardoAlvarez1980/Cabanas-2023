@@ -1,0 +1,70 @@
+@startuml = startuml
+  Reservas --> Clientes : cliente
+  Reservas --> Cabanas : cabaña
+
+  class Reservas {
+    - numero: int
+    - fechaInicio: string
+    - fechaFin: string
+    - cliente: Clientes
+    - cabana: Cabanas
+
+    + getNumero(): int
+    + setNumero(numero: int): void
+    + getFechaInicio(): string
+    + setFechaInicio(fechaInicio: string): void
+    + getFechaFin(): string
+    + setFechaFin(fechaFin: string): void
+    + getCliente(): Clientes
+    + getCabana(): Cabanas
+    + calcularCostoTotal(): float
+    + calcularDiferenciaDias(): int
+  }
+
+  class Conexion {
+    - host: string
+    - usuario: string
+    - contrasena: string
+    - base_de_datos: string
+    - conexion: PDO
+
+    + obtenerInstancia(): Conexion
+    + obtenerConexion(): PDO
+  }
+
+  class Clientes {
+    - dni: string
+    - nombre: string
+    - direccion: string
+    - telefono: string
+    - email: string
+
+    + getDni(): string
+    + setDni(dni: string): void
+    + getNombre(): string
+    + setNombre(nombre: string): void
+    + getDireccion(): string
+    + setDireccion(direccion: string): void
+    + getTelefono(): string
+    + setTelefono(telefono: string): void
+    + getEmail(): string
+    + setEmail(email: string): void
+  }
+
+  class Cabanas {
+    - numero: int
+    - capacidad: int
+    - descripcion: string
+    - costoDiario: float
+
+    + getNumero(): int
+    + setNumero(numero: int): void
+    + getCapacidad(): int
+    + setCapacidad(capacidad: int): void
+    + getDescripcion(): string
+    + setDescripcion(descripcion: string): void
+    + getCostoDiario(): float
+    + setCostoDiario(costoDiario: float): void
+  }
+
+@enduml

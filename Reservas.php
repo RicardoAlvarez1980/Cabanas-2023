@@ -48,6 +48,11 @@ class Reservas {
     public function getCabana() {
         return $this->cabana;
     }
+    /**
+     * Calcula el costo total de la reserva.
+     *
+     * @return float Costo total de la reserva.
+     */
     public function calcularCostoTotal()
     {
         // Verificar si $this->cabana es un objeto válido de la clase Cabanas
@@ -62,6 +67,11 @@ class Reservas {
         }
     }
 
+    /**
+     * Calcula la diferencia en días entre la fecha de inicio y la fecha de fin de la reserva.
+     *
+     * @return int Número de días de diferencia.
+     */
     public function calcularDiferenciaDias()
     {
         $fechaInicio = new DateTime($this->fechaInicio);
