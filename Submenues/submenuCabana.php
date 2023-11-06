@@ -253,9 +253,9 @@ function listarCabanas()
 
     // Listar cabañas en memoria
     if (empty($cabanas)) {
-        echo "No hay cabañas registradas en memoria.\n";
+        echo "No hay cabañas registradas.\n";
     } else {
-        echo "Cabañas en memoria:\n";
+        echo "Cabañas registradas:\n";
         echo "-------------------------------\n";
         foreach ($cabanas as $cabana) {
             echo "Número: " . $cabana->getNumero() . "\n";
@@ -264,28 +264,6 @@ function listarCabanas()
             echo "Costo Diario: $" . $cabana->getCostoDiario() . "\n";
             echo "-------------------------------\n";
         }
-    }
-
-    // Listar cabañas desde la base de datos
-    $conexion = Conexion::obtenerInstancia(); // Obtener una instancia de la conexión
-    $pdo = $conexion->obtenerConexion();
-
-    $stmt = $pdo->query("SELECT * FROM cabanas");
-
-    $cabanasDesdeBD = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    if (!empty($cabanasDesdeBD)) {
-        echo "Cabañas en la base de datos:\n";
-        echo "-------------------------------\n";
-        foreach ($cabanasDesdeBD as $cabanaDesdeBD) {
-            echo "Cabaña Número: " . $cabanaDesdeBD['numero'] . "\n";
-            echo "Capacidad: " . $cabanaDesdeBD['capacidad'] . "\n";
-            echo "Descripción: " . $cabanaDesdeBD['descripcion'] . "\n";
-            echo "Costo Diario: $" . $cabanaDesdeBD['costo_diario'] . "\n";
-            echo "-------------------------------\n";
-        }
-    } else {
-        echo "No hay cabañas registradas en la base de datos.\n";
     }
 }
 

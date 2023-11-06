@@ -256,7 +256,7 @@ function listarClientes()
     if (empty($clientes)) {
         echo "No hay clientes registrados en la memoria.\n";
     } else {
-        echo "\nClientes en memoria:\n";
+        echo "\nClientes registrados:\n";
         echo "------------------------------\n";
         foreach ($clientes as $cliente) {
             echo "DNI: " . $cliente->getDni() . "\n";
@@ -264,29 +264,6 @@ function listarClientes()
             echo "Dirección: " . $cliente->getDireccion() . "\n";
             echo "Teléfono: " . $cliente->getTelefono() . "\n";
             echo "Email: " . $cliente->getEmail() . "\n";
-            echo "------------------------------\n";
-        }
-    }
-
-    // Listar clientes desde la base de datos
-    $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
-    $pdo = $conexion->obtenerConexion();
-
-    $stmt = $pdo->query("SELECT * FROM clientes");
-
-    $clientesDesdeBD = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    if (empty($clientesDesdeBD)) {
-        echo "No hay clientes registrados en la base de datos.\n";
-    } else {
-        echo "Clientes en la base de datos:\n";
-        echo "------------------------------\n";
-        foreach ($clientesDesdeBD as $cliente) {
-            echo "DNI: " . $cliente['dni'] . "\n";
-            echo "Nombre: " . $cliente['nombre'] . "\n";
-            echo "Dirección: " . $cliente['direccion'] . "\n";
-            echo "Teléfono: " . $cliente['telefono'] . "\n";
-            echo "Email: " . $cliente['email'] . "\n";
             echo "------------------------------\n";
         }
     }
@@ -334,10 +311,11 @@ function buscarClientesPorNombre()
     echo "\nBúsqueda de Clientes por Nombre\n";
     echo "==================================\n";
     echo "Ingrese el nombre o parte del nombre a buscar: ";
+    echo "--------------------------------------------------\n";
     $nombre = trim(fgets(STDIN));
 
     echo "=====================================";
-    echo "\nClientes encontrados en memoria:\n";
+    echo "\nClientes encontrados:\n";
     echo "=====================================\n";
 
     global $clientes;
@@ -345,7 +323,7 @@ function buscarClientesPorNombre()
     $resultadosMemoria = [];
 
     if (empty($clientes)) {
-        echo "No hay clientes en memoria.\n";
+        echo "No hay clientes.\n";
     } else {
         foreach ($clientes as $cliente) {
             // Realizar la búsqueda en la memoria
@@ -355,7 +333,7 @@ function buscarClientesPorNombre()
         }
 
         if (empty($resultadosMemoria)) {
-            echo "No se encontraron clientes en memoria que coincidan con la búsqueda.\n";
+            echo "No se encontraron clientes que coincidan con la búsqueda.\n";
         } else {
             foreach ($resultadosMemoria as $cliente) {
                 echo "DNI: " . $cliente->getDni() . "\n";
