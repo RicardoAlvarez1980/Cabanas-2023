@@ -281,9 +281,18 @@ function modificarReserva()
 // Función para eliminar una reserva
 function eliminarReserva()
 {
-    global $reservas;
+    global $reservas, $cabanas, $clientes;
 
     echo "\nEliminar Reserva\n";
+
+    // Mostrar la lista de reservas con el nombre del cliente y la fecha de reserva
+    echo "---------------------------------\n";
+    echo "Lista de Reservas:\n";
+    echo "---------------------------------\n";
+    foreach ($reservas as $reserva) {
+        echo "ID de Reserva: " . $reserva->getNumero() . " - Cliente: " . $reserva->getCliente()->getNombre() . " - Fecha de Reserva: " . $reserva->getFechaInicio() . "\n";
+    }
+    echo "---------------------------------\n";
 
     // Solicitar número de reserva a eliminar
     echo "Ingrese el número de reserva que desea eliminar: ";
