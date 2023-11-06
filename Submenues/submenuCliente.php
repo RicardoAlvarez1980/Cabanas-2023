@@ -336,45 +336,6 @@ function buscarClientesPorNombre()
     echo "Ingrese el nombre o parte del nombre a buscar: ";
     $nombre = trim(fgets(STDIN));
 
-    // Buscar clientes en la base de datos
-    $conexion = Conexion::obtenerInstancia(); // Obtener una instancia de la conexión
-    $pdo = $conexion->obtenerConexion();
-
-    $stmt = $pdo->prepare("SELECT * FROM clientes WHERE LOWER(nombre) LIKE :nombre");
-    $stmt->bindValue(':nombre', '%' . strtolower($nombre) . '%', PDO::PARAM_STR);
-    $stmt->execute();
-
-    $resultadosBD = [];
-
-    while ($clienteDesdeBD = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        // Crear una instancia de Cliente desde los datos de la base de datos
-        $cliente = new Clientes(
-            $clienteDesdeBD['dni'],
-            $clienteDesdeBD['nombre'],
-            $clienteDesdeBD['direccion'],
-            $clienteDesdeBD['telefono'],
-            $clienteDesdeBD['email']
-        );
-        $resultadosBD[] = $cliente;
-    }
-
-    if (empty($resultadosBD)) {
-        echo "No se encontraron clientes en la base de datos que coincidan con la búsqueda.\n";
-    } else {
-        echo "==============================================";
-        echo "\nClientes encontrados en la base de datos:\n";
-        echo "==============================================\n";
-
-        foreach ($resultadosBD as $cliente) {
-            echo "DNI: " . $cliente->getDni() . "\n";
-            echo "Nombre: " . $cliente->getNombre() . "\n";
-            echo "Dirección: " . $cliente->getDireccion() . "\n";
-            echo "Teléfono: " . $cliente->getTelefono() . "\n";
-            echo "Email: " . $cliente->getEmail() . "\n";
-            echo "---------------------------\n";
-        }
-    }
-
     echo "=====================================";
     echo "\nClientes encontrados en memoria:\n";
     echo "=====================================\n";

@@ -375,8 +375,8 @@ function listarReservas()
             echo "  Descripción: " . $cabana->getDescripcion() . "\n";
             echo "  Costo Diario: $" . $cabana->getCostoDiario() . "\n";
 
-            echo "Diferencia de Días en la Reserva: " . $reserva->calcularDiferenciaDias() . " días\n";
-            echo "Costo Total de la Reserva: $" . $reserva->calcularCostoTotal() . "\n";
+            echo "Total de días reservados: " . $reserva->calcularDiferenciaDias() . " días\n";
+            echo "Costo Total de la reserva: $" . $reserva->calcularCostoTotal() . "\n";
             echo "---------------------------\n";
         }
     }
