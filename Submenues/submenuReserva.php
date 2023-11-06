@@ -167,9 +167,10 @@ function altaReserva()
         echo "Dirección: " . $cliente->getDireccion() . "\n";
         echo "Teléfono: " . $cliente->getTelefono() . "\n";
         echo "Email: " . $cliente->getEmail() . "\n";
-        echo "---------------------------\n";
+        echo "-----------------------------------------------\n";
     }
-    echo "Ingrese el DNI del cliente que realiza la reserva: ";
+    echo "Ingrese el DNI del cliente que realiza la reserva: \n";
+    echo "-----------------------------------------------\n";
     $dniCliente = trim(fgets(STDIN));
 
     // Buscar el cliente por su DNI

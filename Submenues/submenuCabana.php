@@ -133,7 +133,7 @@ function modificarCabana()
     if ($cabanaEncontrada) {
         // Mostrar la información actual de la cabaña
         echo "Información actual de la Cabaña:\n";
-        echo "----------------------------------";
+        echo "----------------------------------\n";
         echo "Cabaña Número: " . $cabanaEncontrada->getNumero() . "\n";
         echo "Capacidad: " . $cabanaEncontrada->getCapacidad() . "\n";
         echo "Descripción: " . $cabanaEncontrada->getDescripcion() . "\n";
