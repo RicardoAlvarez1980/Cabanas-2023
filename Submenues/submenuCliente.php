@@ -310,8 +310,7 @@ function buscarClientesPorNombre()
     echo "==================================";
     echo "\nBúsqueda de Clientes por Nombre\n";
     echo "==================================\n";
-    echo "Ingrese el nombre o parte del nombre a buscar: ";
-    echo "--------------------------------------------------\n";
+    echo "Ingrese el nombre o parte del nombre a buscar: \n";
     $nombre = trim(fgets(STDIN));
 
     echo "=====================================";
