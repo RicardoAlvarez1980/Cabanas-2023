@@ -242,14 +242,13 @@ function eliminarCabana()
             } catch (PDOException $e) {
                 $pdo->rollBack();
                 echo "Error al eliminar la cabaña: " . $e->getMessage() . "\n";
+                echo "La cabaña tiene reservas activas.\n";
             }
         }
     } else {
         echo "No se encontró una cabaña con ese número.\n";
     }
 }
-
-
 
 // Función para listar cabañas
 function listarCabanas()

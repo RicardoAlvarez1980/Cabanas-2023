@@ -77,79 +77,28 @@ function menuReservas()
     }
 }
 
-// Función para dar de alta una reserva
-function altaReserva_anterior()
+function ingresarFechaDDMMYYYY()
 {
-    global $reservas, $cabanas, $clientes;
-    echo "\nAlta de Reserva\n";
+    $fechaValida = false;
 
-    while (true) {
-        // Solicitar datos de la reserva al usuario
-        echo "Ingrese el DNI del cliente que realiza la reserva: ";
-        $dniCliente = trim(fgets(STDIN));
+    while (!$fechaValida) {
+        echo "Ingrese la fecha en formato DD/MM/YYYY: ";
+        $fecha = trim(fgets(STDIN));
 
-        // Buscar el cliente por su DNI
-        $clienteSeleccionado = buscarClientePorDNI($dniCliente);
+        // Dividir la fecha en día, mes y año
+        list($dia, $mes, $anio) = explode('/', $fecha);
 
-        if (!$clienteSeleccionado) {
-            echo "No se encontró un cliente con ese DNI. ¿Desea intentar nuevamente? (S/N): ";
-            $opcion = strtoupper(trim(fgets(STDIN)));
-            if ($opcion !== 'S') {
-                // Devolver al menú principal
-                return;
-            }
+        // Verificar si la fecha es válida
+        if (checkdate((int)$mes, (int)$dia, (int)$anio)) {
+            $fechaValida = true;
         } else {
-            break; // Continuar si se encontró el cliente
+            echo "Fecha no válida. Por favor, ingrese una fecha en el formato correcto.\n";
         }
     }
 
-    while (true) {
-        // Mostrar lista de cabañas disponibles
-        echo "---------------------------------";
-        echo "\nCabañas Disponibles:\n";
-        echo "---------------------------------\n";
-        foreach ($cabanas as $cabana) {
-            echo "Número: " . $cabana->getNumero() . "\n";
-            echo "---------------------------\n";
-        }
-        echo "Ingrese el número de la cabaña a reservar: ";
-        $numeroCabana = trim(fgets(STDIN));
-
-        // Buscar la cabaña por su número
-        $cabanaSeleccionada = buscarCabanaPorNumero($numeroCabana);
-
-        if (!$cabanaSeleccionada) {
-            echo "No se encontró una cabaña con ese número. ¿Desea intentar nuevamente? (S/N): ";
-            $opcion = strtoupper(trim(fgets(STDIN)));
-            if ($opcion !== 'S') {
-                // Devolver al menú principal
-                return;
-            }
-        } else {
-            break; // Continuar si se encontró la cabaña
-        }
-    }
-    echo "Ingrese la fecha de inicio de la reserva (formato YYYY-MM-DD): ";
-    $fechaInicio = trim(fgets(STDIN));
-    echo "Ingrese la fecha de fin de la reserva (formato YYYY-MM-DD): ";
-    $fechaFin = trim(fgets(STDIN));
-
-    // Crear una nueva instancia de Reservas
-    $reserva = new Reservas(count($reservas) + 1, $fechaInicio, $fechaFin, $clienteSeleccionado, $cabanaSeleccionada);
-    $reservas[] = $reserva;
-
-    echo "Reserva agregada exitosamente en memoria.\n";
-
-    // Aquí, después de agregar la reserva en memoria, también la insertamos en la base de datos
-    $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
-    $pdo = $conexion->obtenerConexion();
-
-    // Preparar la consulta SQL
-    $stmt = $pdo->prepare("INSERT INTO reservas (numero_reserva, fecha_inicio, fecha_fin, cliente_dni, cabana_numero) VALUES (?, ?, ?, ?, ?)");
-
-    // Ejecutar la consulta con los datos de la reserva
-    $stmt->execute([$reserva->getNumero(), $fechaInicio, $fechaFin, $dniCliente, $numeroCabana]);
-    echo "Reserva agregada exitosamente en la base de datos.\n";
+    // Formatear la fecha como YYYY-MM-DD para almacenar en la base de datos
+    $fechaFormateada = sprintf('%04d-%02d-%02d', $anio, $mes, $dia);
+    return $fechaFormateada;
 }
 
 function altaReserva()
@@ -203,10 +152,11 @@ function altaReserva()
         return;
     }
 
-    echo "Ingrese la fecha de inicio de la reserva (formato YYYY-MM-DD): ";
-    $fechaInicio = trim(fgets(STDIN));
-    echo "Ingrese la fecha de fin de la reserva (formato YYYY-MM-DD): ";
-    $fechaFin = trim(fgets(STDIN));
+    // Ingresar y validar la fecha de inicio de la reserva
+    $fechaInicio = ingresarFechaDDMMYYYY();
+
+    // Ingresar y validar la fecha de fin de la reserva
+    $fechaFin = ingresarFechaDDMMYYYY();
 
     // Crear una nueva instancia de Reservas con los datos proporcionados
     $reserva = new Reservas(count($reservas) + 1, $fechaInicio, $fechaFin, $clienteSeleccionado, $cabanaSeleccionada);
@@ -261,10 +211,11 @@ function modificarReserva()
         echo "Cabaña: " . $reservaEncontrada->getCabana()->getNumero() . "\n";
 
         // Solicitar los nuevos datos al usuario
-        echo "Ingrese la nueva fecha de inicio de la reserva (formato YYYY-MM-DD, deje en blanco para mantener el valor actual): ";
-        $nuevaFechaInicio = trim(fgets(STDIN));
-        echo "Ingrese la nueva fecha de fin de la reserva (formato YYYY-MM-DD, deje en blanco para mantener el valor actual): ";
-        $nuevaFechaFin = trim(fgets(STDIN));
+       // Ingresar y validar la nueva fecha de inicio de la reserva
+        $nuevaFechaInicio = ingresarFechaDDMMYYYY();
+
+        // Ingresar y validar la nueva fecha de fin de la reserva
+        $nuevaFechaFin = ingresarFechaDDMMYYYY();
 
         // Actualizar los campos de la reserva si se ingresan nuevos valores
         if (!empty($nuevaFechaInicio)) {
