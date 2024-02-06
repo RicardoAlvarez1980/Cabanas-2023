@@ -187,7 +187,7 @@ function actualizarCabanaEnBaseDeDatos($cabana)
 // Función para eliminar una cabaña
 function eliminarCabana()
 {
-    global $cabanas;
+    global $cabanas, $reservas;
 
     echo "=======================";
     echo "\nEliminar Cabaña\n";
@@ -201,46 +201,55 @@ function eliminarCabana()
     $cabanaEncontrada = buscarCabanaPorNumero($numero);
 
     if ($cabanaEncontrada) {
-        // Mostrar la información completa de la cabaña
-        echo "Información de la Cabaña:\n";
-        echo "------------------------------\n";
-        echo "Número: " . $cabanaEncontrada->getNumero() . "\n";
-        echo "Capacidad: " . $cabanaEncontrada->getCapacidad() . "\n";
-        echo "Descripción: " . $cabanaEncontrada->getDescripcion() . "\n";
-        echo "Costo Diario: $" . $cabanaEncontrada->getCostoDiario() . "\n";
+        // Verificar si hay reservas asociadas a la cabaña
+        $reservasAsociadas = false;
+        foreach ($reservas as $reserva) {
+            if ($reserva->getCabana()->getNumero() === $numero) {
+                $reservasAsociadas = true;
+                break;
+            }
+        }
 
-        // Confirmar eliminación
-        echo "¿Está seguro de que desea eliminar esta cabaña? (S/N): ";
-        $opcion = strtoupper(trim(fgets(STDIN)));
-
-        if ($opcion === 'S') {
+        if ($reservasAsociadas) {
+            echo "No se puede eliminar esta cabaña porque tiene reservas asociadas.\n";
+        } else {
             // Eliminar la cabaña de la lista en memoria
             $key = array_search($cabanaEncontrada, $cabanas);
             if ($key !== false) {
                 unset($cabanas[$key]);
-                echo "La cabaña fue eliminada exitosamente en memoria.\n";
             } else {
                 echo "No se pudo eliminar la cabaña en memoria.\n";
             }
 
-            // Aquí, después de eliminar la cabaña en memoria, también eliminamos los datos de la base de datos
+            // Eliminar la cabaña de la base de datos
             $conexion = Conexion::obtenerInstancia(); // Obtener una instancia de la conexión
             $pdo = $conexion->obtenerConexion();
+            $pdo->beginTransaction();
 
-            // Preparar la consulta SQL de eliminación
-            $stmt = $pdo->prepare("DELETE FROM cabanas WHERE numero=?");
+            try {
+                // Eliminar las reservas asociadas a la cabaña de la base de datos
+                $stmt = $pdo->prepare("DELETE FROM reservas WHERE numero_cabana=?");
+                $stmt->execute([$numero]);
 
-            // Ejecutar la consulta para eliminar la cabaña de la base de datos
-            $stmt->execute([$numero]);
+                // Preparar la consulta SQL de eliminación de la cabaña
+                $stmt = $pdo->prepare("DELETE FROM cabanas WHERE numero=?");
 
-            echo "La cabaña fue eliminada exitosamente en la base de datos.\n";
-        } else {
-            echo "La eliminación ha sido cancelada.\n";
+                // Ejecutar la consulta para eliminar la cabaña de la base de datos
+                $stmt->execute([$numero]);
+
+                $pdo->commit();
+                echo "La cabaña fue eliminada exitosamente en la base de datos.\n";
+            } catch (PDOException $e) {
+                $pdo->rollBack();
+                echo "Error al eliminar la cabaña: " . $e->getMessage() . "\n";
+            }
         }
     } else {
         echo "No se encontró una cabaña con ese número.\n";
     }
 }
+
+
 
 // Función para listar cabañas
 function listarCabanas()

@@ -1,6 +1,7 @@
 <?php
 
 require_once 'Clientes.php';
+require_once 'Reservas.php';
 
 
 function cargarClientesDesdeBD()
@@ -67,7 +68,7 @@ function altaCliente()
     echo "=======================";
     echo "\nAlta de Cliente\n";
     echo "=======================\n";
-    
+
     while (true) {
         // Solicitar datos del cliente al usuario
         echo "Ingrese el DNI del cliente: ";
@@ -120,7 +121,7 @@ function modificarCliente()
     echo "=======================";
     echo "\nModificar Cliente\n";
     echo "=======================\n";
-    
+
     // Solicitar DNI del cliente a modificar
     echo "Ingrese el DNI del cliente que desea modificar (o deje en blanco para volver al Menú Principal): ";
     $dni = trim(fgets(STDIN));
@@ -191,11 +192,11 @@ function modificarCliente()
 // Función para eliminar un cliente
 function eliminarCliente()
 {
-    global $clientes;
+    global $clientes, $reservas;
     echo "=======================";
     echo "\nEliminar Cliente\n";
     echo "=======================\n";
-    
+
     // Solicitar DNI del cliente a eliminar
     echo "Ingrese el DNI del cliente que desea eliminar: ";
     $dni = trim(fgets(STDIN));
@@ -204,46 +205,54 @@ function eliminarCliente()
     $clienteEncontrado = buscarClientePorDNI($dni);
 
     if ($clienteEncontrado) {
-        // Mostrar la información completa del cliente
-        echo "Información del Cliente:\n";
-        echo "DNI: " . $clienteEncontrado->getDni() . "\n";
-        echo "Nombre: " . $clienteEncontrado->getNombre() . "\n";
-        echo "Dirección: " . $clienteEncontrado->getDireccion() . "\n";
-        echo "Teléfono: " . $clienteEncontrado->getTelefono() . "\n";
-        echo "Email: " . $clienteEncontrado->getEmail() . "\n";
+        // Verificar si hay reservas asociadas al cliente
+        $reservasAsociadas = false;
+        foreach ($reservas as $reserva) {
+            if ($reserva->getCliente()->getDni() === $dni) {
+                $reservasAsociadas = true;
+                break;
+            }
+        }
 
-        // Confirmar eliminación
-        echo "¿Está seguro de que desea eliminar este cliente? (S/N): ";
-        $opcion = strtoupper(trim(fgets(STDIN)));
-
-        if ($opcion === 'S') {
-            // Eliminar el cliente de la lista en memoria
+        if ($reservasAsociadas) {
+            echo "No se puede eliminar este cliente porque tiene reservas asociadas.\n";
+        } else {
+            // Eliminar la cabaña de la lista en memoria
             $key = array_search($clienteEncontrado, $clientes);
             if ($key !== false) {
                 unset($clientes[$key]);
-                echo "El cliente fue eliminado exitosamente en memoria.\n";
             } else {
                 echo "No se pudo eliminar el cliente en memoria.\n";
             }
-
             // Eliminar el cliente de la base de datos
             $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
             $pdo = $conexion->obtenerConexion();
+            $pdo->beginTransaction();
 
-            // Preparar la consulta SQL de eliminación
-            $stmt = $pdo->prepare("DELETE FROM clientes WHERE dni=?");
+            try {
+                // Eliminar todas las reservas asociadas al cliente
+                $stmt = $pdo->prepare("DELETE FROM reservas WHERE dni_cliente=?");
+                $stmt->execute([$dni]);
 
-            // Ejecutar la consulta
-            $stmt->execute([$dni]);
+                // Eliminar el cliente de la tabla de clientes
+                $stmt = $pdo->prepare("DELETE FROM clientes WHERE dni=?");
+                $stmt->execute([$dni]);
 
-            echo "El cliente fue eliminado exitosamente en la base de datos.\n";
-        } else {
-            echo "La eliminación ha sido cancelada.\n";
+                $pdo->commit();
+                echo "El cliente fue eliminado exitosamente.\n";
+            } catch (PDOException $e) {
+                $pdo->rollBack();
+                echo "Error al eliminar el cliente: " . $e->getMessage() . "\n";
+                echo "El cliente tiene reservas activas.\n";
+            }
         }
     } else {
         echo "No se encontró un cliente con ese DNI.\n";
     }
 }
+
+
+
 
 function listarClientes()
 {
