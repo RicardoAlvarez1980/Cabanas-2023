@@ -317,8 +317,10 @@ function listarReservas()
     } else {
         foreach ($reservas as $reserva) {
             echo "\nNúmero de Reserva: " . $reserva->getNumero() . "\n";
-            echo "Fecha de Inicio: " . $reserva->getFechaInicio() . "\n";
-            echo "Fecha de Fin: " . $reserva->getFechaFin() . "\n";
+            // Formatear fecha de inicio
+            echo "Fecha de Inicio: " . date('d/m/Y', strtotime($reserva->getFechaInicio())) . "\n";
+            // Formatear fecha de fin
+            echo "Fecha de Fin: " . date('d/m/Y', strtotime($reserva->getFechaFin())) . "\n";
 
             $cliente = $reserva->getCliente();
             $cabana = $reserva->getCabana();
