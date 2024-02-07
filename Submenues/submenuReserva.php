@@ -77,27 +77,10 @@ function menuReservas()
     }
 }
 
-function ingresarFechaDDMMYYYY()
+function formatoFechaDDMMYYYY($fecha)
 {
-    $fechaValida = false;
-
-    while (!$fechaValida) {
-        echo "Ingrese la fecha en formato DD/MM/YYYY: ";
-        $fecha = trim(fgets(STDIN));
-
-        // Dividir la fecha en día, mes y año
-        list($dia, $mes, $anio) = explode('/', $fecha);
-
-        // Verificar si la fecha es válida
-        if (checkdate((int)$mes, (int)$dia, (int)$anio)) {
-            $fechaValida = true;
-        } else {
-            echo "Fecha no válida. Por favor, ingrese una fecha en el formato correcto.\n";
-        }
-    }
-
-    // Formatear la fecha como YYYY-MM-DD para almacenar en la base de datos
-    $fechaFormateada = sprintf('%04d-%02d-%02d', $anio, $mes, $dia);
+    // Convertir la fecha de YYYY-MM-DD a DD/MM/YYYY
+    $fechaFormateada = date("d/m/Y", strtotime($fecha));
     return $fechaFormateada;
 }
 
@@ -153,10 +136,10 @@ function altaReserva()
     }
 
     // Ingresar y validar la fecha de inicio de la reserva
-    $fechaInicio = ingresarFechaDDMMYYYY();
+    $fechaInicio = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
 
     // Ingresar y validar la fecha de fin de la reserva
-    $fechaFin = ingresarFechaDDMMYYYY();
+    $fechaFin = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
 
     // Crear una nueva instancia de Reservas con los datos proporcionados
     $reserva = new Reservas(count($reservas) + 1, $fechaInicio, $fechaFin, $clienteSeleccionado, $cabanaSeleccionada);
@@ -174,6 +157,7 @@ function altaReserva()
 
     echo "Reserva agregada exitosamente.\n";
 }
+
 // Función para modificar una reserva
 function modificarReserva()
 {
@@ -186,7 +170,7 @@ function modificarReserva()
     echo "Lista de Reservas:\n";
     echo "---------------------------------\n";
     foreach ($reservas as $reserva) {
-        echo "ID de Reserva: " . $reserva->getNumero() . " - Cliente: " . $reserva->getCliente()->getNombre() . " - Fecha de Reserva: " . $reserva->getFechaInicio() . "\n";
+        echo "ID de Reserva: " . $reserva->getNumero() . " - Cliente: " . $reserva->getCliente()->getNombre() . " - Fecha de Reserva: " . formatoFechaDDMMYYYY($reserva->getFechaInicio()) . "\n";
     }
     echo "---------------------------------\n";
 
@@ -205,17 +189,28 @@ function modificarReserva()
         // Mostrar la información actual de la reserva
         echo "Información actual de la Reserva:\n";
         echo "Número de Reserva: " . $reservaEncontrada->getNumero() . "\n";
-        echo "Fecha de Inicio: " . $reservaEncontrada->getFechaInicio() . "\n";
-        echo "Fecha de Fin: " . $reservaEncontrada->getFechaFin() . "\n";
+        echo "Fecha de Inicio: " . formatoFechaDDMMYYYY($reservaEncontrada->getFechaInicio()) . "\n";
+        echo "Fecha de Fin: " . formatoFechaDDMMYYYY($reservaEncontrada->getFechaFin()) . "\n";
         echo "Cliente: " . $reservaEncontrada->getCliente()->getNombre() . "\n";
         echo "Cabaña: " . $reservaEncontrada->getCabana()->getNumero() . "\n";
 
-        // Solicitar los nuevos datos al usuario
-       // Ingresar y validar la nueva fecha de inicio de la reserva
-        $nuevaFechaInicio = ingresarFechaDDMMYYYY();
+        // Solicitar las nuevas fechas al usuario
+        // Solicitar la nueva fecha de inicio al usuario
+        echo "Ingrese la nueva fecha de inicio (o deje en blanco para mantener la actual): ";
+        $nuevaFechaInicio = trim(fgets(STDIN));
 
-        // Ingresar y validar la nueva fecha de fin de la reserva
-        $nuevaFechaFin = ingresarFechaDDMMYYYY();
+        // Solicitar la nueva fecha de fin al usuario
+        echo "Ingrese la nueva fecha de fin (o deje en blanco para mantener la actual): ";
+        $nuevaFechaFin = trim(fgets(STDIN));
+
+        // Validar y formatear las nuevas fechas si se proporcionaron
+        if (!empty($nuevaFechaInicio)) {
+            $nuevaFechaInicio = formatoFechaDDMMYYYY($nuevaFechaInicio);
+        }
+
+        if (!empty($nuevaFechaFin)) {
+            $nuevaFechaFin = formatoFechaDDMMYYYY($nuevaFechaFin);
+        }
 
         // Actualizar los campos de la reserva si se ingresan nuevos valores
         if (!empty($nuevaFechaInicio)) {
@@ -224,11 +219,23 @@ function modificarReserva()
         if (!empty($nuevaFechaFin)) {
             $reservaEncontrada->setFechaFin($nuevaFechaFin);
         }
+        // Aquí, después de actualizar los datos en memoria, también la actualizamos en la base de datos
+        $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
+        $pdo = $conexion->obtenerConexion();
+
+        // Preparar la consulta SQL para actualizar la reserva en la base de datos
+        $stmt = $pdo->prepare("UPDATE reservas SET fecha_inicio = ?, fecha_fin = ? WHERE numero_reserva = ?");
+
+        // Ejecutar la consulta con los datos actualizados de la reserva
+        $stmt->execute([$reservaEncontrada->getFechaInicio(), $reservaEncontrada->getFechaFin(), $numeroReserva]);
+
         echo "Reserva modificada exitosamente.\n";
     } else {
         echo "No se encontró una reserva con ese número.\n";
     }
 }
+
+
 
 // Función para eliminar una reserva
 function eliminarReserva()
@@ -242,7 +249,7 @@ function eliminarReserva()
     echo "Lista de Reservas:\n";
     echo "---------------------------------\n";
     foreach ($reservas as $reserva) {
-        echo "ID de Reserva: " . $reserva->getNumero() . " - Cliente: " . $reserva->getCliente()->getNombre() . " - Fecha de Reserva: " . $reserva->getFechaInicio() . "\n";
+        echo "ID de Reserva: " . $reserva->getNumero() . " - Cliente: " . $reserva->getCliente()->getNombre() . " - Fecha de Reserva: " . formatoFechaDDMMYYYY($reserva->getFechaInicio()) . "\n";
     }
     echo "---------------------------------\n";
 
@@ -263,8 +270,8 @@ function eliminarReserva()
         // Mostrar la información completa de la reserva
         echo "Información de la Reserva:\n";
         echo "Número de Reserva: " . $reservaEncontrada->getNumero() . "\n";
-        echo "Fecha de Inicio: " . $reservaEncontrada->getFechaInicio() . "\n";
-        echo "Fecha de Fin: " . $reservaEncontrada->getFechaFin() . "\n";
+        echo "Fecha de Inicio: " . formatoFechaDDMMYYYY($reservaEncontrada->getFechaInicio()) . "\n";
+        echo "Fecha de Fin: " . formatoFechaDDMMYYYY($reservaEncontrada->getFechaFin()). "\n";
         echo "Cliente: " . $reservaEncontrada->getCliente()->getNombre() . "\n";
         echo "Cabaña: " . $reservaEncontrada->getCabana()->getNumero() . "\n";
 
@@ -277,9 +284,9 @@ function eliminarReserva()
             $key = array_search($reservaEncontrada, $reservas);
             if ($key !== false) {
                 unset($reservas[$key]);
-                echo "La reserva fue eliminada exitosamente en memoria.\n";
+                echo "La reserva fue eliminada exitosamente.\n";
             } else {
-                echo "No se pudo eliminar la reserva en memoria.\n";
+                echo "No se pudo eliminar la reserva.\n";
             }
 
             // Eliminar la reserva de la base de datos
@@ -292,10 +299,7 @@ function eliminarReserva()
             // Ejecutar la consulta
             $stmt->execute([$numeroReserva]);
 
-            echo "La reserva fue eliminada exitosamente en la base de datos.\n";
-        } else {
-            echo "La eliminación ha sido cancelada.\n";
-        }
+        } 
     } else {
         echo "No se encontró una reserva con ese número.\n";
     }
@@ -317,10 +321,8 @@ function listarReservas()
     } else {
         foreach ($reservas as $reserva) {
             echo "\nNúmero de Reserva: " . $reserva->getNumero() . "\n";
-            // Formatear fecha de inicio
-            echo "Fecha de Inicio: " . date('d/m/Y', strtotime($reserva->getFechaInicio())) . "\n";
-            // Formatear fecha de fin
-            echo "Fecha de Fin: " . date('d/m/Y', strtotime($reserva->getFechaFin())) . "\n";
+            echo "Fecha de Inicio: " . formatoFechaDDMMYYYY($reserva->getFechaInicio()) . "\n";
+            echo "Fecha de Fin: " . formatoFechaDDMMYYYY($reserva->getFechaFin()) . "\n";
 
             $cliente = $reserva->getCliente();
             $cabana = $reserva->getCabana();
@@ -344,6 +346,7 @@ function listarReservas()
         }
     }
 }
+
 function buscarReservaPorNumero($numero)
 {
     global $reservas;
