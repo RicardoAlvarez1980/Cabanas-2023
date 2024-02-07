@@ -136,9 +136,11 @@ function altaReserva()
     }
 
     // Ingresar y validar la fecha de inicio de la reserva
+    echo "Ingrese la fecha de inicio en formato DD/MM/YYYY o un texto descriptivo: ";
     $fechaInicio = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
 
     // Ingresar y validar la fecha de fin de la reserva
+    echo "Ingrese la fecha de fin en formato DD/MM/YYYY o un texto descriptivo: ";
     $fechaFin = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
 
     // Crear una nueva instancia de Reservas con los datos proporcionados
@@ -157,6 +159,7 @@ function altaReserva()
 
     echo "Reserva agregada exitosamente.\n";
 }
+
 
 // Función para modificar una reserva
 function modificarReserva()

@@ -8,11 +8,10 @@ require_once './Conexion.php';
 //HECHOS:
 //1 - Sería Proteger usando integridad referencial.
 //    Al eliminar reservas se elimina cliente y cabaña asociados a la misma (Evitar esto)
-
-//POR HACER:
 //2 - Validar fechas. Mostrarlas e ingresarlas en el formato nuestro. 
-//3 - Dadas las fechas de reserva, muestre las cabañas disponibles. 
-//    Buscar cabañas libres dada una fecha en particular
+//POR HACER:
+//3 - Dadas las fechas de reserva, muestre las cabañas disponibles. (modificar altareserva())
+//    Buscar cabañas libres dada una fecha en particular (nueva funcion)
 
 // Arreglos para almacenar cabañas, clientes y reservas
 $cabanas = [];
