@@ -100,9 +100,6 @@ function altaCliente()
     // Crear una nueva instancia de Clientes
     $cliente = new Clientes($dni, $nombre, $direccion, $telefono, $email);
     $clientes[] = $cliente;
-
-    echo "Cliente agregado exitosamente en memoria.\n";
-
     // Aquí, después de agregar el cliente en memoria, también lo insertamos en la base de datos
     $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
     $pdo = $conexion->obtenerConexion();
@@ -112,7 +109,7 @@ function altaCliente()
 
     // Ejecutar la consulta con los datos del cliente
     $stmt->execute([$dni, $nombre, $direccion, $telefono, $email]);
-    echo "Cliente agregado exitosamente en la base de datos.\n";
+    echo "Cliente agregado exitosamente.\n";
 }
 // Función para modificar un cliente
 function modificarCliente()
@@ -165,9 +162,6 @@ function modificarCliente()
         if (!empty($nuevoEmail)) {
             $clienteEncontrado->setEmail($nuevoEmail);
         }
-
-        echo "Cliente modificado exitosamente en memoria.\n";
-
         // Aquí, después de modificar el cliente en memoria, también actualizamos los datos en la base de datos
         $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
         $pdo = $conexion->obtenerConexion();
@@ -184,7 +178,7 @@ function modificarCliente()
             $dni
         ]);
 
-        echo "Cliente modificado exitosamente en la base de datos.\n";
+        echo "Cliente modificado exitosamente.\n";
     } else {
         echo "No se encontró un cliente con ese DNI.\n";
     }
@@ -222,7 +216,7 @@ function eliminarCliente()
             if ($key !== false) {
                 unset($clientes[$key]);
             } else {
-                echo "No se pudo eliminar el cliente en memoria.\n";
+                echo "No se pudo eliminar el clientea.\n";
             }
             // Eliminar el cliente de la base de datos
             $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
@@ -263,7 +257,7 @@ function listarClientes()
 
     // Listar clientes en memoria
     if (empty($clientes)) {
-        echo "No hay clientes registrados en la memoria.\n";
+        echo "No hay clientes registrados.\n";
     } else {
         echo "\nClientes registrados:\n";
         echo "------------------------------\n";

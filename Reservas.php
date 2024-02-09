@@ -8,7 +8,6 @@ class Reservas {
     private $fechaFin;
     private $cliente; // Un objeto de tipo Clientes
     private $cabana;  // Un objeto de tipo Cabanas
-
     public function __construct($numero, $fechaInicio, $fechaFin, $cliente, $cabana) {
         $this->numero = $numero;
         $this->fechaInicio = $fechaInicio;
@@ -16,35 +15,27 @@ class Reservas {
         $this->cliente = $cliente;
         $this->cabana = $cabana;
     }
-
     public function getNumero() {
         return $this->numero;
     }
-
     public function setNumero($numero) {
         $this->numero = $numero;
     }
-
     public function getFechaInicio() {
         return $this->fechaInicio;
     }
-
     public function setFechaInicio($fechaInicio) {
         $this->fechaInicio = $fechaInicio;
     }
-
     public function getFechaFin() {
         return $this->fechaFin;
     }
-
     public function setFechaFin($fechaFin) {
         $this->fechaFin = $fechaFin;
     }
-
     public function getCliente() {
         return $this->cliente;
     }
-
     public function getCabana() {
         return $this->cabana;
     }
@@ -66,7 +57,6 @@ class Reservas {
             return 0; // O cualquier otro valor apropiado en este caso
         }
     }
-
     /**
      * Calcula la diferencia en días entre la fecha de inicio y la fecha de fin de la reserva.
      *
@@ -79,5 +69,4 @@ class Reservas {
         $diferencia = $fechaInicio->diff($fechaFin);
         return $diferencia->days;
     }
-
 }

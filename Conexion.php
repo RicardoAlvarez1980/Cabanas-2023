@@ -12,11 +12,16 @@ class Conexion
     private function __construct()
     {
         try {
+            // Establecer la conexión PDO
             $this->conexion = new PDO(
                 "pgsql:host={$this->host};dbname={$this->base_de_datos}",
                 $this->usuario,
                 $this->contrasena
             );
+
+            // Establecer la codificación de caracteres UTF-8
+            $this->conexion->exec('SET client_encoding TO \'UTF8\'');
+
         } catch (PDOException $e) {
             die("Error de conexión a la base de datos: " . $e->getMessage());
         }
@@ -41,3 +46,6 @@ class Conexion
         throw new RuntimeException('La clonación de esta instancia no está permitida.');
     }
 }
+
+
+

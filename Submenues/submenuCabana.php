@@ -26,6 +26,7 @@ function cargarCabanasDesdeBD()
         $cabanas[] = $cabana;
     }
 }
+
 // Menú de Gestionar Cabañas
 function menuCabanas()
 {
@@ -213,24 +214,12 @@ function eliminarCabana()
         if ($reservasAsociadas) {
             echo "No se puede eliminar esta cabaña porque tiene reservas asociadas.\n";
         } else {
-            // Eliminar la cabaña de la lista en memoria
-            $key = array_search($cabanaEncontrada, $cabanas);
-            if ($key !== false) {
-                unset($cabanas[$key]);
-            } else {
-                echo "No se pudo eliminar la cabaña en memoria.\n";
-            }
-
             // Eliminar la cabaña de la base de datos
             $conexion = Conexion::obtenerInstancia(); // Obtener una instancia de la conexión
             $pdo = $conexion->obtenerConexion();
             $pdo->beginTransaction();
 
             try {
-                // Eliminar las reservas asociadas a la cabaña de la base de datos
-                $stmt = $pdo->prepare("DELETE FROM reservas WHERE numero_cabana=?");
-                $stmt->execute([$numero]);
-
                 // Preparar la consulta SQL de eliminación de la cabaña
                 $stmt = $pdo->prepare("DELETE FROM cabanas WHERE numero=?");
 
@@ -308,4 +297,5 @@ function buscarCabanaPorNumero($numero)
 
     return null;
 }
+
 ?>
