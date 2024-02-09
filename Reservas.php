@@ -79,4 +79,5 @@ class Reservas {
         $diferencia = $fechaInicio->diff($fechaFin);
         return $diferencia->days;
     }
+
 }

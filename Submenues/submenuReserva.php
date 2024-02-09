@@ -84,23 +84,58 @@ function formatoFechaDDMMYYYY($fecha)
     return $fechaFormateada;
 }
 
+
+
+// Nueva función para buscar cabañas libres en un rango de fechas
+function buscarCabañasLibresEnFechas($fechaInicio, $fechaFin)
+{
+    global $cabanas, $reservas;
+
+    $cabañasLibres = [];
+
+    foreach ($cabanas as $cabana) {
+        // Verificar si la cabaña está libre para las fechas dadas
+        $cabañaOcupada = false;
+
+        foreach ($reservas as $reserva) {
+            // Convertir las fechas de la reserva a objetos DateTime
+            $inicioReserva = new DateTime($reserva->getFechaInicio());
+            $finReserva = new DateTime($reserva->getFechaFin());
+            $inicioBusqueda = new DateTime($fechaInicio);
+            $finBusqueda = new DateTime($fechaFin);
+
+            // Verificar si hay superposición de fechas
+            if (
+                $inicioReserva < $finBusqueda &&
+                $finReserva > $inicioBusqueda &&
+                $reserva->getCabana()->getNumero() === $cabana->getNumero()
+            ) {
+                $cabañaOcupada = true;
+                break; // No es necesario seguir verificando
+            }
+        }
+
+        // Si la cabaña no está ocupada, se agrega a la lista de cabañas libres
+        if (!$cabañaOcupada) {
+            $cabañasLibres[] = $cabana;
+        }
+    }
+
+    return $cabañasLibres;
+}
+// Modificar la función altaReserva para buscar cabañas disponibles en las fechas seleccionadas
 function altaReserva()
 {
-    global $reservas, $cabanas, $clientes;
+    global $reservas, $clientes, $cabanas;
+
     echo "\nAlta de Reserva\n";
 
     // Solicitar datos de la reserva al usuario
     echo "---------------------\n";
     echo "Clientes Disponibles:\n";
     echo "---------------------\n";
-    foreach ($clientes as $cliente) {
-        echo "DNI: " . $cliente->getDni() . "\n";
-        echo "Nombre: " . $cliente->getNombre() . "\n";
-        echo "Dirección: " . $cliente->getDireccion() . "\n";
-        echo "Teléfono: " . $cliente->getTelefono() . "\n";
-        echo "Email: " . $cliente->getEmail() . "\n";
-        echo "-----------------------------------------------\n";
-    }
+    // ...
+
     echo "Ingrese el DNI del cliente que realiza la reserva: \n";
     echo "-----------------------------------------------\n";
     $dniCliente = trim(fgets(STDIN));
@@ -113,17 +148,35 @@ function altaReserva()
         return;
     }
 
+    // Ingresar y validar la fecha de inicio de la reserva
+    echo "Ingrese la fecha de inicio en formato DD/MM/YYYY o un texto descriptivo: ";
+    $fechaInicio = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
+
+    // Ingresar y validar la fecha de fin de la reserva
+    echo "Ingrese la fecha de fin en formato DD/MM/YYYY o un texto descriptivo: ";
+    $fechaFin = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
+
+    // Buscar cabañas disponibles en las fechas seleccionadas
+    $cabañasDisponibles = buscarCabañasLibresEnFechas($fechaInicio, $fechaFin);
+
     // Mostrar detalles de las cabañas disponibles
+    if (empty($cabañasDisponibles)) {
+        echo "No hay cabañas disponibles para las fechas seleccionadas.\n";
+        return;
+    }
+
     echo "---------------------\n";
     echo "Cabañas Disponibles:\n";
     echo "---------------------\n";
-    foreach ($cabanas as $cabana) {
+    foreach ($cabañasDisponibles as $cabana) {
         echo "Número: " . $cabana->getNumero() . "\n";
         echo "Capacidad: " . $cabana->getCapacidad() . "\n";
         echo "Descripción: " . $cabana->getDescripcion() . "\n";
         echo "Costo Diario: $" . $cabana->getCostoDiario() . "\n";
         echo "---------------------------\n";
     }
+
+    // Ingresar el número de la cabaña a reservar
     echo "Ingrese el número de la cabaña a reservar: ";
     $numeroCabana = trim(fgets(STDIN));
 
@@ -134,14 +187,6 @@ function altaReserva()
         echo "No se encontró una cabaña con ese número. La reserva no se puede completar.\n";
         return;
     }
-
-    // Ingresar y validar la fecha de inicio de la reserva
-    echo "Ingrese la fecha de inicio en formato DD/MM/YYYY o un texto descriptivo: ";
-    $fechaInicio = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
-
-    // Ingresar y validar la fecha de fin de la reserva
-    echo "Ingrese la fecha de fin en formato DD/MM/YYYY o un texto descriptivo: ";
-    $fechaFin = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
 
     // Crear una nueva instancia de Reservas con los datos proporcionados
     $reserva = new Reservas(count($reservas) + 1, $fechaInicio, $fechaFin, $clienteSeleccionado, $cabanaSeleccionada);
