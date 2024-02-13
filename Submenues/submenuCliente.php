@@ -200,23 +200,56 @@ function eliminarCliente()
 
     if ($clienteEncontrado) {
         // Verificar si hay reservas asociadas al cliente
-        $reservasAsociadas = false;
-        foreach ($reservas as $reserva) {
-            if ($reserva->getCliente()->getDni() === $dni) {
-                $reservasAsociadas = true;
-                break;
-            }
-        }
+        $reservasCliente = array_filter($reservas, function($reserva) use ($dni) {
+            return $reserva->getCliente()->getDni() === $dni;
+        });
 
-        if ($reservasAsociadas) {
-            echo "No se puede eliminar este cliente porque tiene reservas asociadas.\n";
+        if (!empty($reservasCliente)) {
+            echo "El cliente tiene reservas asociadas:\n";
+            foreach ($reservasCliente as $reserva) {
+                echo "Nombre: " . $reserva->getCliente()->getNombre() . ", DNI: " . $reserva->getCliente()->getDni() . "\n";
+            }
+            echo "¿Está seguro de que desea eliminar este cliente y sus reservas? (S/N): ";
+            $confirmacion = strtoupper(trim(fgets(STDIN)));
+            if ($confirmacion === 'S') {
+                // Eliminar el cliente de la lista en memoria
+                $key = array_search($clienteEncontrado, $clientes);
+                if ($key !== false) {
+                    unset($clientes[$key]);
+                } else {
+                    echo "No se pudo eliminar el cliente.\n";
+                }
+                // Eliminar el cliente de la base de datos
+                $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
+                $pdo = $conexion->obtenerConexion();
+                $pdo->beginTransaction();
+
+                try {
+                    // Eliminar todas las reservas asociadas al cliente
+                    $stmt = $pdo->prepare("DELETE FROM reservas WHERE cliente_dni=?");
+                    $stmt->execute([$dni]);
+
+                    // Eliminar el cliente de la tabla de clientes
+                    $stmt = $pdo->prepare("DELETE FROM clientes WHERE dni=?");
+                    $stmt->execute([$dni]);
+
+                    $pdo->commit();
+                    echo "El cliente y sus reservas fueron eliminados exitosamente.\n";
+                } catch (PDOException $e) {
+                    $pdo->rollBack();
+                    echo "Error al eliminar el cliente: " . $e->getMessage() . "\n";
+                }
+            } else {
+                echo "La eliminación del cliente fue cancelada.\n";
+            }
         } else {
-            // Eliminar la cabaña de la lista en memoria
+            // No hay reservas asociadas al cliente, eliminar directamente
+            // Eliminar el cliente de la lista en memoria
             $key = array_search($clienteEncontrado, $clientes);
             if ($key !== false) {
                 unset($clientes[$key]);
             } else {
-                echo "No se pudo eliminar el clientea.\n";
+                echo "No se pudo eliminar el cliente.\n";
             }
             // Eliminar el cliente de la base de datos
             $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
@@ -224,10 +257,6 @@ function eliminarCliente()
             $pdo->beginTransaction();
 
             try {
-                // Eliminar todas las reservas asociadas al cliente
-                $stmt = $pdo->prepare("DELETE FROM reservas WHERE dni_cliente=?");
-                $stmt->execute([$dni]);
-
                 // Eliminar el cliente de la tabla de clientes
                 $stmt = $pdo->prepare("DELETE FROM clientes WHERE dni=?");
                 $stmt->execute([$dni]);
@@ -237,13 +266,14 @@ function eliminarCliente()
             } catch (PDOException $e) {
                 $pdo->rollBack();
                 echo "Error al eliminar el cliente: " . $e->getMessage() . "\n";
-                echo "El cliente tiene reservas activas.\n";
             }
         }
     } else {
         echo "No se encontró un cliente con ese DNI.\n";
     }
 }
+
+
 
 
 
