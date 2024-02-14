@@ -187,59 +187,105 @@ function modificarCliente()
 function eliminarCliente()
 {
     global $clientes, $reservas;
+
     echo "=======================";
-    echo "\nEliminar Cliente\n";
+    echo "\nModificar Cliente\n";
     echo "=======================\n";
 
     // Solicitar DNI del cliente a eliminar
     echo "Ingrese el DNI del cliente que desea eliminar: ";
-    $dni = trim(fgets(STDIN));
+    $dniCliente = intval(trim(fgets(STDIN)));
 
     // Buscar el cliente por su DNI
-    $clienteEncontrado = buscarClientePorDNI($dni);
+    $clienteEncontrado = buscarClientePorDNI($dniCliente);
 
     if ($clienteEncontrado) {
-        // Verificar si hay reservas asociadas al cliente
-        $reservasAsociadas = false;
-        foreach ($reservas as $reserva) {
-            if ($reserva->getCliente()->getDni() === $dni) {
-                $reservasAsociadas = true;
-                break;
-            }
-        }
+        // Mostrar información del cliente
+        echo "\nInformación del Cliente:\n";
+        echo "DNI: " . $clienteEncontrado->getDni() . "\n";
+        echo "Nombre: " . $clienteEncontrado->getNombre() . "\n";
+        echo "Dirección: " . $clienteEncontrado->getDireccion() . "\n";
+        echo "Teléfono: " . $clienteEncontrado->getTelefono() . "\n";
+        echo "Email: " . $clienteEncontrado->getEmail() . "\n";
 
-        if ($reservasAsociadas) {
-            echo "No se puede eliminar este cliente porque tiene reservas asociadas.\n";
-        } else {
-            // Eliminar el cliente de la lista en memoria
-            $key = array_search($clienteEncontrado, $clientes);
-            if ($key !== false) {
-                unset($clientes[$key]);
+        // Verificar si el cliente tiene reservas asociadas en la base de datos
+        $conexion = Conexion::obtenerInstancia();
+        $pdo = $conexion->obtenerConexion();
+
+        $stmtReservas = $pdo->prepare("SELECT * FROM reservas WHERE cliente_dni = ?");
+        $stmtReservas->execute([$dniCliente]);
+        $reservasCliente = $stmtReservas->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!empty($reservasCliente)) {
+            echo "\nEste cliente tiene reservas asociadas:\n";
+            foreach ($reservasCliente as $reserva) {
+                echo "Número de Reserva: " . $reserva['numero_reserva'] . " - Fecha de Reserva: " . $reserva['fecha_inicio'] . "\n";
+            }
+
+            // Preguntar si desea eliminar al cliente y sus reservas
+            echo "\n¿Desea eliminar este cliente y todas sus reservas? (S/N): ";
+            $opcion = strtoupper(trim(fgets(STDIN)));
+
+            if ($opcion === 'S') {
+                // Eliminar las reservas del cliente en memoria
+                foreach ($reservasCliente as $reserva) {
+                    $keyReserva = array_search($reserva, $reservas);
+                    if ($keyReserva !== false) {
+                        unset($reservas[$keyReserva]);
+                    }
+                }
+                echo "Las reservas asociadas al cliente fueron eliminadas exitosamente.\n";
+
+                // Eliminar el cliente de la lista en memoria
+                $keyCliente = array_search($clienteEncontrado, $clientes);
+                if ($keyCliente !== false) {
+                    unset($clientes[$keyCliente]);
+                    echo "El cliente fue eliminado exitosamente.\n";
+                } else {
+                    echo "No se pudo eliminar el cliente en memoria.\n";
+                }
+
+                // Eliminar el cliente de la base de datos
+                $stmtEliminarReservas = $pdo->prepare("DELETE FROM reservas WHERE cliente_dni = ?");
+                $stmtEliminarReservas->execute([$dniCliente]);
+
+                $stmtEliminarCliente = $pdo->prepare("DELETE FROM clientes WHERE dni = ?");
+                $stmtEliminarCliente->execute([$dniCliente]);
+
+                echo "El cliente y sus reservas fueron eliminados exitosamente en la base de datos.\n";
             } else {
-                echo "No se pudo eliminar el clientea.\n";
+                echo "La eliminación ha sido cancelada.\n";
             }
-            // Eliminar el cliente de la base de datos
-            $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
-            $pdo = $conexion->obtenerConexion();
-            $pdo->beginTransaction();
+        } else {
+            // Si el cliente no tiene reservas, preguntar si desea eliminarlo
+            echo "\n¿Desea eliminar este cliente? (S/N): ";
+            $opcion = strtoupper(trim(fgets(STDIN)));
 
-            try {
-                // Eliminar el cliente de la tabla de clientes
-                $stmt = $pdo->prepare("DELETE FROM clientes WHERE dni=?");
-                $stmt->execute([$dni]);
+            if ($opcion === 'S') {
+                // Eliminar el cliente de la lista en memoria
+                $keyCliente = array_search($clienteEncontrado, $clientes);
+                if ($keyCliente !== false) {
+                    unset($clientes[$keyCliente]);
+                    echo "El cliente fue eliminado exitosamente.\n";
+                } else {
+                    echo "No se pudo eliminar el cliente.\n";
+                }
 
-                $pdo->commit();
-                echo "El cliente fue eliminado exitosamente.\n";
-            } catch (PDOException $e) {
-                $pdo->rollBack();
-                echo "Error al eliminar el cliente: " . $e->getMessage() . "\n";
-                echo "El cliente tiene reservas activas.\n";
+                // Eliminar el cliente de la base de datos
+                $stmtEliminarCliente = $pdo->prepare("DELETE FROM clientes WHERE dni = ?");
+                $stmtEliminarCliente->execute([$dniCliente]);
+
+                echo "El cliente fue eliminado exitosamente en la base de datos.\n";
+            } else {
+                echo "La eliminación ha sido cancelada.\n";
             }
         }
     } else {
         echo "No se encontró un cliente con ese DNI.\n";
     }
-} 
+}
+
+
 
 function listarClientes()
 {
@@ -341,3 +387,4 @@ function buscarClientesPorNombre()
         }
     }
 }
+    
