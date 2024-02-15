@@ -219,7 +219,7 @@ function eliminarCliente()
         if (!empty($reservasCliente)) {
             echo "\nEste cliente tiene reservas asociadas:\n";
             foreach ($reservasCliente as $reserva) {
-                echo "Número de Reserva: " . $reserva['numero_reserva'] . " - Fecha de Reserva: " . $reserva['fecha_inicio'] . "\n";
+                echo "Número de Reserva: " . $reserva['numero_reserva'] . " - Fecha de Reserva: " . formatoFechaDDMMYYYY($reserva['fecha_inicio']) . "\n";
             }
 
             // Preguntar si desea eliminar al cliente y sus reservas
