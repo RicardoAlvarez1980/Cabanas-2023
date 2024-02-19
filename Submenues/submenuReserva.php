@@ -149,11 +149,11 @@ function altaReserva()
     }
 
     // Ingresar y validar la fecha de inicio de la reserva
-    echo "Ingrese la fecha de inicio en formato DD/MM/YYYY o un texto descriptivo: ";
+    echo "Ingrese la fecha de inicio en formato DD/MM/YYYY: ";
     $fechaInicio = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
 
     // Ingresar y validar la fecha de fin de la reserva
-    echo "Ingrese la fecha de fin en formato DD/MM/YYYY o un texto descriptivo: ";
+    echo "Ingrese la fecha de fin en formato DD/MM/YYYY: ";
     $fechaFin = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
 
     // Buscar cabañas disponibles en las fechas seleccionadas
