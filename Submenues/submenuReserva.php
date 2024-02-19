@@ -79,11 +79,18 @@ function menuReservas()
 
 function formatoFechaDDMMYYYY($fecha)
 {
-    // Convertir la fecha de YYYY-MM-DD a DD/MM/YYYY
-    $fechaFormateada = date("d/m/Y", strtotime($fecha));
-    return $fechaFormateada;
-}
+    // Intentar crear un objeto DateTime con la fecha proporcionada
+    $fechaObjeto = DateTime::createFromFormat('d/m/Y', $fecha);
 
+    // Verificar si la fecha es válida y coincide con el formato esperado
+    if ($fechaObjeto && $fechaObjeto->format('d/m/Y') === $fecha) {
+        return $fechaObjeto->format('Y-m-d'); // Cambiamos el formato de salida a Y-m-d
+    } else {
+        // Si la fecha no es válida, mostrar un mensaje de error
+        echo "Fecha no válida. Por favor, ingrese una fecha en el formato correcto.\n";
+        return null;
+    }
+}
 
 
 // Nueva función para buscar cabañas libres en un rango de fechas
@@ -123,6 +130,7 @@ function buscarCabañasLibresEnFechas($fechaInicio, $fechaFin)
 
     return $cabañasLibres;
 }
+
 // Modificar la función altaReserva para buscar cabañas disponibles en las fechas seleccionadas
 function altaReserva()
 {
@@ -149,12 +157,29 @@ function altaReserva()
     }
 
     // Ingresar y validar la fecha de inicio de la reserva
-    echo "Ingrese la fecha de inicio en formato DD/MM/YYYY: ";
-    $fechaInicio = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
+    $fechaInicio = null;
+    while (!$fechaInicio) {
+        echo "Ingrese la fecha de inicio en formato DD/MM/YYYY: ";
+        $fechaInicio = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
+
+        // Validar que la fecha de inicio sea válida
+        if (!$fechaInicio) {
+            echo "La fecha de inicio es incorrecta. Intente nuevamente.\n";
+        }
+    }
 
     // Ingresar y validar la fecha de fin de la reserva
-    echo "Ingrese la fecha de fin en formato DD/MM/YYYY: ";
-    $fechaFin = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
+    $fechaFin = null;
+    while (!$fechaFin) {
+        echo "Ingrese la fecha de fin en formato DD/MM/YYYY: ";
+        $fechaFin = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
+
+        // Validar que la fecha de fin sea válida y no sea anterior a la fecha de inicio
+        if (!$fechaFin || strtotime($fechaFin) < strtotime($fechaInicio)) {
+            echo "La fecha de fin es incorrecta. Intente nuevamente.\n";
+            $fechaFin = null; // Reiniciar la variable para volver a solicitarla
+        }
+    }
 
     // Buscar cabañas disponibles en las fechas seleccionadas
     $cabañasDisponibles = buscarCabañasLibresEnFechas($fechaInicio, $fechaFin);
@@ -204,6 +229,10 @@ function altaReserva()
 
     echo "Reserva agregada exitosamente.\n";
 }
+
+
+
+
 
 
 // Función para modificar una reserva
@@ -297,7 +326,9 @@ function eliminarReserva()
     echo "Lista de Reservas:\n";
     echo "---------------------------------\n";
     foreach ($reservas as $reserva) {
-        echo "ID de Reserva: " . $reserva->getNumero() . " - Cliente: " . $reserva->getCliente()->getNombre() . " - Fecha de Reserva: " . formatoFechaDDMMYYYY($reserva->getFechaInicio()) . "\n";
+        $fechaInicio = date("d/m/Y", strtotime($reserva->getFechaInicio()));
+        $fechaFin = date("d/m/Y", strtotime($reserva->getFechaFin()));
+        echo "ID de Reserva: " . $reserva->getNumero() . " - Cliente: " . $reserva->getCliente()->getNombre() . " - Inicio de la reserva: " . $fechaInicio . " - Fin de la reserva: " . $fechaFin . "\n";
     }
     echo "---------------------------------\n";
 
@@ -315,11 +346,15 @@ function eliminarReserva()
     }
 
     if ($reservaEncontrada) {
+        $fechaInicioEncontrada = date("d/m/Y", strtotime($reservaEncontrada->getFechaInicio()));
+        $fechaFinEncontrada = date("d/m/Y", strtotime($reservaEncontrada->getFechaFin()));
+        
         // Mostrar la información completa de la reserva
+
         echo "Información de la Reserva:\n";
         echo "Número de Reserva: " . $reservaEncontrada->getNumero() . "\n";
-        echo "Fecha de Inicio: " . formatoFechaDDMMYYYY($reservaEncontrada->getFechaInicio()) . "\n";
-        echo "Fecha de Fin: " . formatoFechaDDMMYYYY($reservaEncontrada->getFechaFin()). "\n";
+        echo "Fecha de Inicio: " . $fechaInicioEncontrada. "\n";
+        echo "Fecha de Fin: " . $fechaFinEncontrada. "\n";
         echo "Cliente: " . $reservaEncontrada->getCliente()->getNombre() . "\n";
         echo "Cabaña: " . $reservaEncontrada->getCabana()->getNumero() . "\n";
 
@@ -368,10 +403,20 @@ function listarReservas()
         echo "\nNo hay reservas registradas en el sistema.\n";
     } else {
         foreach ($reservas as $reserva) {
-            echo "\nNúmero de Reserva: " . $reserva->getNumero() . "\n";
-            echo "Fecha de Inicio: " . formatoFechaDDMMYYYY($reserva->getFechaInicio()) . "\n";
-            echo "Fecha de Fin: " . formatoFechaDDMMYYYY($reserva->getFechaFin()) . "\n";
+            $fechaInicio = date("d/m/Y", strtotime($reserva->getFechaInicio()));
+            $fechaFin = date("d/m/Y", strtotime($reserva->getFechaFin()));
 
+            // Validar que las fechas sean válidas
+            if (!$fechaInicio || !$fechaFin) {
+                echo "Error: Las fechas de la reserva no son válidas.\n";
+                continue; // Pasar a la próxima reserva
+            }
+
+            echo "\nNúmero de Reserva: " . $reserva->getNumero() . "\n";
+            echo "Fecha de Inicio: " . $fechaInicio. "\n";
+            echo "Fecha de Fin: " . $fechaFin. "\n";
+
+            // Resto del código (sin cambios)
             $cliente = $reserva->getCliente();
             $cabana = $reserva->getCabana();
 
@@ -394,6 +439,7 @@ function listarReservas()
         }
     }
 }
+
 
 function buscarReservaPorNumero($numero)
 {
