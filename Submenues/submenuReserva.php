@@ -246,8 +246,14 @@ function modificarReserva()
     echo "---------------------------------\n";
     echo "Lista de Reservas:\n";
     echo "---------------------------------\n";
+         // Ordenar el array de reservas por el número de reserva
+         usort($reservas, function ($a, $b) {
+            return $a->getNumero() - $b->getNumero();
+        });
     foreach ($reservas as $reserva) {
-        echo "ID de Reserva: " . $reserva->getNumero() . " - Cliente: " . $reserva->getCliente()->getNombre() . " - Fecha de Reserva: " . formatoFechaDDMMYYYY($reserva->getFechaInicio()) . "\n";
+        $fechaInicio = date("d/m/Y", strtotime($reserva->getFechaInicio()));
+        $fechaFin = date("d/m/Y", strtotime($reserva->getFechaFin()));
+        echo "ID de Reserva: " . $reserva->getNumero() . " - Cliente: " . $reserva->getCliente()->getNombre() . " - Inicio de la reserva: " . $fechaInicio . " - Fin de la reserva: " . $fechaFin . "\n";
     }
     echo "---------------------------------\n";
 
@@ -263,11 +269,13 @@ function modificarReserva()
     $reservaEncontrada = buscarReservaPorNumero($numeroReserva);
 
     if ($reservaEncontrada) {
+        $fechaInicioEncontrada = date("d/m/Y", strtotime($reservaEncontrada->getFechaInicio()));
+        $fechaFinEncontrada = date("d/m/Y", strtotime($reservaEncontrada->getFechaFin()));
         // Mostrar la información actual de la reserva
         echo "Información actual de la Reserva:\n";
         echo "Número de Reserva: " . $reservaEncontrada->getNumero() . "\n";
-        echo "Fecha de Inicio: " . formatoFechaDDMMYYYY($reservaEncontrada->getFechaInicio()) . "\n";
-        echo "Fecha de Fin: " . formatoFechaDDMMYYYY($reservaEncontrada->getFechaFin()) . "\n";
+        echo "Fecha de Inicio: " . $fechaInicioEncontrada . "\n";
+        echo "Fecha de Fin: " . $fechaFinEncontrada . "\n";
         echo "Cliente: " . $reservaEncontrada->getCliente()->getNombre() . "\n";
         echo "Cabaña: " . $reservaEncontrada->getCabana()->getNumero() . "\n";
 
@@ -325,7 +333,12 @@ function eliminarReserva()
     echo "---------------------------------\n";
     echo "Lista de Reservas:\n";
     echo "---------------------------------\n";
+     // Ordenar el array de reservas por el número de reserva
+     usort($reservas, function ($a, $b) {
+        return $a->getNumero() - $b->getNumero();
+    });
     foreach ($reservas as $reserva) {
+    
         $fechaInicio = date("d/m/Y", strtotime($reserva->getFechaInicio()));
         $fechaFin = date("d/m/Y", strtotime($reserva->getFechaFin()));
         echo "ID de Reserva: " . $reserva->getNumero() . " - Cliente: " . $reserva->getCliente()->getNombre() . " - Inicio de la reserva: " . $fechaInicio . " - Fin de la reserva: " . $fechaFin . "\n";
@@ -348,7 +361,7 @@ function eliminarReserva()
     if ($reservaEncontrada) {
         $fechaInicioEncontrada = date("d/m/Y", strtotime($reservaEncontrada->getFechaInicio()));
         $fechaFinEncontrada = date("d/m/Y", strtotime($reservaEncontrada->getFechaFin()));
-        
+
         // Mostrar la información completa de la reserva
 
         echo "Información de la Reserva:\n";
@@ -402,6 +415,11 @@ function listarReservas()
     if (empty($reservas)) {
         echo "\nNo hay reservas registradas en el sistema.\n";
     } else {
+        // Ordenar el array de reservas por el número de reserva
+        usort($reservas, function ($a, $b) {
+            return $a->getNumero() - $b->getNumero();
+        });
+
         foreach ($reservas as $reserva) {
             $fechaInicio = date("d/m/Y", strtotime($reserva->getFechaInicio()));
             $fechaFin = date("d/m/Y", strtotime($reserva->getFechaFin()));
