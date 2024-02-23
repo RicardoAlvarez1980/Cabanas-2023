@@ -9,8 +9,11 @@ require_once './Conexion.php';
 //    Al eliminar reservas se elimina cliente y cabaña asociados a la misma (Evitar esto)
 //2 - Validar fechas. Mostrarlas e ingresarlas en el formato nuestro. 
 //3 - Dadas las fechas de reserva, muestre las cabañas disponibles. (modificar altareserva())
+//4 - Buscar cabañas libres dada una fecha en particular (nueva funcion).FUNCION YA HECHA.FALTA IMPLEMENTARLA CORRECTAMENTE EN EL MENU
+
 //POR HACER:
-//    Buscar cabañas libres dada una fecha en particular (nueva funcion).FUNCION YA HECHA.FALTA IMPLEMENTARLA CORRECTAMENTE EN EL MENU
+//Documentación: Agregar la documentación relacionada a AltaReserva (Busca cabañas libres), y funcion BuscarCabañasLibresporFechas.
+//Reestructuración del Menu principal (Se borró listados y se agregró Buscar Cabañas Libres)
 
 // Arreglos para almacenar cabañas, clientes y reservas
 $cabanas = [];
