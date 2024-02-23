@@ -37,7 +37,7 @@ function menuPrincipal()
     echo "2. Gestionar Cabañas\n";
     echo "3. Gestionar Reservas\n";
     echo "4. Buscar Clientes por Nombre\n";
-    echo "5. Busqueda de Cabañas\n";
+    echo "5. Busqueda de Cabañas Libres\n";
     echo "0. Salir\n";
 
     $opcion = leerOpcion("Seleccione una opción: ");
