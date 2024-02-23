@@ -132,11 +132,30 @@ function buscarCabanasLibresEnFechas($fechaInicio, $fechaFin)
 
 function buscarCabana()
 {
-    echo "Ingrese la fecha de inicio (formato dd/mm/yyyy): ";
-    $fechaInicio = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
+    // Ingresar y validar la fecha de inicio de la reserva
+    $fechaInicio = null;
+    while (!$fechaInicio) {
+        echo "Ingrese la fecha de inicio en formato DD/MM/YYYY: ";
+        $fechaInicio = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
 
-    echo "Ingrese la fecha de fin (formato dd/mm/yyyy): ";
-    $fechaFin = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
+        // Validar que la fecha de inicio sea válida
+        if (!$fechaInicio) {
+            echo "La fecha de inicio es incorrecta. Intente nuevamente.\n";
+        }
+    }
+
+    // Ingresar y validar la fecha de fin de la reserva
+    $fechaFin = null;
+    while (!$fechaFin) {
+        echo "Ingrese la fecha de fin en formato DD/MM/YYYY: ";
+        $fechaFin = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
+
+        // Validar que la fecha de fin sea válida y no sea anterior a la fecha de inicio
+        if (!$fechaFin || strtotime($fechaFin) < strtotime($fechaInicio)) {
+            echo "La fecha de fin es incorrecta. Intente nuevamente.\n";
+            $fechaFin = null; // Reiniciar la variable para volver a solicitarla
+        }
+    }
 
     // Buscar cabañas disponibles en las fechas seleccionadas
     $cabanasDisponibles = buscarCabanasLibresEnFechas($fechaInicio, $fechaFin);
@@ -145,7 +164,7 @@ function buscarCabana()
     usort($cabanasDisponibles, function ($a, $b) {
         return $a->getNumero() - $b->getNumero();
     });
-    
+
     // Mostrar detalles de las cabañas disponibles
     if (empty($cabanasDisponibles)) {
         echo "No hay cabañas disponibles para las fechas seleccionadas.\n";
