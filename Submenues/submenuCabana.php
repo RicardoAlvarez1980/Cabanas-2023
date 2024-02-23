@@ -96,8 +96,6 @@ function altaCabana()
     $cabana = new Cabanas($numero, $capacidad, $descripcion, $costoDiario);
     $cabanas[] = $cabana;
 
-    echo "Cabaña agregada exitosamente en memoria.\n";
-
     // Aquí, después de agregar la cabaña en memoria, también la insertamos en la base de datos
     $conexion = Conexion::obtenerInstancia(); // Obtenemos una instancia de la conexión
     $pdo = $conexion->obtenerConexion();
@@ -108,7 +106,7 @@ function altaCabana()
     // Ejecutar la consulta con los datos de la cabaña
     $stmt->execute([$numero, $capacidad, $descripcion, $costoDiario]);
 
-    echo "Cabaña agregada exitosamente en la base de datos.\n";
+    echo "Cabaña agregada exitosamente.\n";
 }
 
 // Función para modificar una cabaña
@@ -158,13 +156,10 @@ function modificarCabana()
         if (!empty($nuevoCostoDiario)) {
             $cabanaEncontrada->setCostoDiario(floatval($nuevoCostoDiario));
         }
-
-        echo "Cabaña modificada exitosamente en memoria.\n";
-
         // Actualizar la cabaña en la base de datos
         actualizarCabanaEnBaseDeDatos($cabanaEncontrada);
 
-        echo "Cabaña modificada exitosamente en la base de datos.\n";
+        echo "Cabaña modificada exitosamente.\n";
     } else {
         echo "No se encontró una cabaña con ese número.\n";
     }
@@ -227,7 +222,7 @@ function eliminarCabana()
                 $stmt->execute([$numero]);
 
                 $pdo->commit();
-                echo "La cabaña fue eliminada exitosamente en la base de datos.\n";
+                echo "La cabaña fue eliminada exitosamente.\n";
             } catch (PDOException $e) {
                 $pdo->rollBack();
                 echo "Error al eliminar la cabaña: " . $e->getMessage() . "\n";

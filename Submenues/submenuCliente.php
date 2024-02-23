@@ -189,7 +189,7 @@ function eliminarCliente()
     global $clientes, $reservas;
 
     echo "=======================";
-    echo "\nModificar Cliente\n";
+    echo "\Eliminar Cliente\n";
     echo "=======================\n";
 
     // Solicitar DNI del cliente a eliminar
@@ -242,7 +242,7 @@ function eliminarCliente()
                     unset($clientes[$keyCliente]);
                     echo "El cliente fue eliminado exitosamente.\n";
                 } else {
-                    echo "No se pudo eliminar el cliente en memoria.\n";
+                    echo "No se pudo eliminar el cliente.\n";
                 }
 
                 // Eliminar el cliente de la base de datos
@@ -252,7 +252,7 @@ function eliminarCliente()
                 $stmtEliminarCliente = $pdo->prepare("DELETE FROM clientes WHERE dni = ?");
                 $stmtEliminarCliente->execute([$dniCliente]);
 
-                echo "El cliente y sus reservas fueron eliminados exitosamente en la base de datos.\n";
+                echo "El cliente y sus reservas fueron eliminados exitosamente.\n";
             } else {
                 echo "La eliminación ha sido cancelada.\n";
             }
@@ -284,9 +284,6 @@ function eliminarCliente()
         echo "No se encontró un cliente con ese DNI.\n";
     }
 }
-
-
-
 function listarClientes()
 {
     global $clientes;

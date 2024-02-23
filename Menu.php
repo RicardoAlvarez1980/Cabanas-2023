@@ -2,7 +2,6 @@
 require_once './Submenues/submenuCliente.php';
 require_once './Submenues/submenuCabana.php';
 require_once './Submenues/submenuReserva.php';
-require_once './Submenues/submenuListados.php';
 require_once './Conexion.php';
 
 //HECHOS:
@@ -38,7 +37,7 @@ function menuPrincipal()
     echo "2. Gestionar Cabañas\n";
     echo "3. Gestionar Reservas\n";
     echo "4. Buscar Clientes por Nombre\n";
-    echo "5. Listados\n";
+    echo "5. Busqueda de Cabañas\n";
     echo "0. Salir\n";
 
     $opcion = leerOpcion("Seleccione una opción: ");
@@ -48,7 +47,7 @@ function menuPrincipal()
         '2' => 'menuCabanas',
         '3' => 'menuReservas',
         '4' => 'buscarClientesPorNombre',
-        '5' => 'menuListados',
+        '5' => 'buscarCabana',
         '0' => 'salir',
     ];
 

@@ -92,17 +92,16 @@ function formatoFechaDDMMYYYY($fecha)
     }
 }
 
-
 // Nueva función para buscar cabañas libres en un rango de fechas
-function buscarCabañasLibresEnFechas($fechaInicio, $fechaFin)
+function buscarCabanasLibresEnFechas($fechaInicio, $fechaFin)
 {
     global $cabanas, $reservas;
 
-    $cabañasLibres = [];
+    $cabanasLibres = [];
 
     foreach ($cabanas as $cabana) {
         // Verificar si la cabaña está libre para las fechas dadas
-        $cabañaOcupada = false;
+        $cabanaOcupada = false;
 
         foreach ($reservas as $reserva) {
             // Convertir las fechas de la reserva a objetos DateTime
@@ -117,18 +116,52 @@ function buscarCabañasLibresEnFechas($fechaInicio, $fechaFin)
                 $finReserva > $inicioBusqueda &&
                 $reserva->getCabana()->getNumero() === $cabana->getNumero()
             ) {
-                $cabañaOcupada = true;
+                $cabanaOcupada = true;
                 break; // No es necesario seguir verificando
             }
         }
 
         // Si la cabaña no está ocupada, se agrega a la lista de cabañas libres
-        if (!$cabañaOcupada) {
-            $cabañasLibres[] = $cabana;
+        if (!$cabanaOcupada) {
+            $cabanasLibres[] = $cabana;
         }
     }
 
-    return $cabañasLibres;
+    return $cabanasLibres;
+}
+
+function buscarCabana()
+{
+    echo "Ingrese la fecha de inicio (formato dd/mm/yyyy): ";
+    $fechaInicio = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
+
+    echo "Ingrese la fecha de fin (formato dd/mm/yyyy): ";
+    $fechaFin = formatoFechaDDMMYYYY(trim(fgets(STDIN)));
+
+    // Buscar cabañas disponibles en las fechas seleccionadas
+    $cabanasDisponibles = buscarCabanasLibresEnFechas($fechaInicio, $fechaFin);
+
+    // Ordenar el array de reservas por el número de reserva
+    usort($cabanasDisponibles, function ($a, $b) {
+        return $a->getNumero() - $b->getNumero();
+    });
+    
+    // Mostrar detalles de las cabañas disponibles
+    if (empty($cabanasDisponibles)) {
+        echo "No hay cabañas disponibles para las fechas seleccionadas.\n";
+        return;
+    }
+    echo "---------------------\n";
+    echo "Cabañas Disponibles:\n";
+    echo "---------------------\n";
+
+    foreach ($cabanasDisponibles as $cabana) {
+        echo "Número: " . $cabana->getNumero() . "\n";
+        echo "Capacidad: " . $cabana->getCapacidad() . "\n";
+        echo "Descripción: " . $cabana->getDescripcion() . "\n";
+        echo "Costo Diario: $" . $cabana->getCostoDiario() . "\n";
+        echo "---------------------------\n";
+    }
 }
 
 // Modificar la función altaReserva para buscar cabañas disponibles en las fechas seleccionadas
@@ -182,10 +215,14 @@ function altaReserva()
     }
 
     // Buscar cabañas disponibles en las fechas seleccionadas
-    $cabañasDisponibles = buscarCabañasLibresEnFechas($fechaInicio, $fechaFin);
+    $cabanasDisponibles = buscarCabanasLibresEnFechas($fechaInicio, $fechaFin);
 
+    // Ordenar el array de reservas por el número de reserva
+    usort($cabanasDisponibles, function ($a, $b) {
+        return $a->getNumero() - $b->getNumero();
+    });
     // Mostrar detalles de las cabañas disponibles
-    if (empty($cabañasDisponibles)) {
+    if (empty($cabanasDisponibles)) {
         echo "No hay cabañas disponibles para las fechas seleccionadas.\n";
         return;
     }
@@ -193,7 +230,7 @@ function altaReserva()
     echo "---------------------\n";
     echo "Cabañas Disponibles:\n";
     echo "---------------------\n";
-    foreach ($cabañasDisponibles as $cabana) {
+    foreach ($cabanasDisponibles as $cabana) {
         echo "Número: " . $cabana->getNumero() . "\n";
         echo "Capacidad: " . $cabana->getCapacidad() . "\n";
         echo "Descripción: " . $cabana->getDescripcion() . "\n";
@@ -230,11 +267,6 @@ function altaReserva()
     echo "Reserva agregada exitosamente.\n";
 }
 
-
-
-
-
-
 // Función para modificar una reserva
 function modificarReserva()
 {
@@ -246,10 +278,10 @@ function modificarReserva()
     echo "---------------------------------\n";
     echo "Lista de Reservas:\n";
     echo "---------------------------------\n";
-         // Ordenar el array de reservas por el número de reserva
-         usort($reservas, function ($a, $b) {
-            return $a->getNumero() - $b->getNumero();
-        });
+    // Ordenar el array de reservas por el número de reserva
+    usort($reservas, function ($a, $b) {
+        return $a->getNumero() - $b->getNumero();
+    });
     foreach ($reservas as $reserva) {
         $fechaInicio = date("d/m/Y", strtotime($reserva->getFechaInicio()));
         $fechaFin = date("d/m/Y", strtotime($reserva->getFechaFin()));
@@ -320,8 +352,6 @@ function modificarReserva()
     }
 }
 
-
-
 // Función para eliminar una reserva
 function eliminarReserva()
 {
@@ -333,12 +363,12 @@ function eliminarReserva()
     echo "---------------------------------\n";
     echo "Lista de Reservas:\n";
     echo "---------------------------------\n";
-     // Ordenar el array de reservas por el número de reserva
-     usort($reservas, function ($a, $b) {
+    // Ordenar el array de reservas por el número de reserva
+    usort($reservas, function ($a, $b) {
         return $a->getNumero() - $b->getNumero();
     });
     foreach ($reservas as $reserva) {
-    
+
         $fechaInicio = date("d/m/Y", strtotime($reserva->getFechaInicio()));
         $fechaFin = date("d/m/Y", strtotime($reserva->getFechaFin()));
         echo "ID de Reserva: " . $reserva->getNumero() . " - Cliente: " . $reserva->getCliente()->getNombre() . " - Inicio de la reserva: " . $fechaInicio . " - Fin de la reserva: " . $fechaFin . "\n";
@@ -366,8 +396,8 @@ function eliminarReserva()
 
         echo "Información de la Reserva:\n";
         echo "Número de Reserva: " . $reservaEncontrada->getNumero() . "\n";
-        echo "Fecha de Inicio: " . $fechaInicioEncontrada. "\n";
-        echo "Fecha de Fin: " . $fechaFinEncontrada. "\n";
+        echo "Fecha de Inicio: " . $fechaInicioEncontrada . "\n";
+        echo "Fecha de Fin: " . $fechaFinEncontrada . "\n";
         echo "Cliente: " . $reservaEncontrada->getCliente()->getNombre() . "\n";
         echo "Cabaña: " . $reservaEncontrada->getCabana()->getNumero() . "\n";
 
@@ -394,8 +424,7 @@ function eliminarReserva()
 
             // Ejecutar la consulta
             $stmt->execute([$numeroReserva]);
-
-        } 
+        }
     } else {
         echo "No se encontró una reserva con ese número.\n";
     }
@@ -430,11 +459,11 @@ function listarReservas()
                 continue; // Pasar a la próxima reserva
             }
 
-            echo "\nNúmero de Reserva: " . $reserva->getNumero() . "\n";
-            echo "Fecha de Inicio: " . $fechaInicio. "\n";
-            echo "Fecha de Fin: " . $fechaFin. "\n";
+            echo "Número de Reserva: " . $reserva->getNumero() . "\n";
+            echo "Fecha de Inicio: " . $fechaInicio . "\n";
+            echo "Fecha de Fin: " . $fechaFin . "\n";
 
-            // Resto del código (sin cambios)
+            // Mostrar la información completa de la reserva
             $cliente = $reserva->getCliente();
             $cabana = $reserva->getCabana();
 
@@ -457,7 +486,6 @@ function listarReservas()
         }
     }
 }
-
 
 function buscarReservaPorNumero($numero)
 {
