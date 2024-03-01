@@ -188,8 +188,8 @@ function eliminarCliente()
 {
     global $clientes, $reservas;
 
-    echo "=======================";
-    echo "\Eliminar Cliente\n";
+    echo "=======================\n";
+    echo "Eliminar Cliente\n";
     echo "=======================\n";
 
     // Solicitar DNI del cliente a eliminar
@@ -200,28 +200,28 @@ function eliminarCliente()
     $clienteEncontrado = buscarClientePorDNI($dniCliente);
 
     if ($clienteEncontrado) {
-        // Mostrar información del cliente
-        echo "\nInformación del Cliente:\n";
-        echo "DNI: " . $clienteEncontrado->getDni() . "\n";
-        echo "Nombre: " . $clienteEncontrado->getNombre() . "\n";
-        echo "Dirección: " . $clienteEncontrado->getDireccion() . "\n";
-        echo "Teléfono: " . $clienteEncontrado->getTelefono() . "\n";
-        echo "Email: " . $clienteEncontrado->getEmail() . "\n";
+    // Mostrar información del cliente
+echo "\nInformación del Cliente:\n";
+echo "DNI: " . $clienteEncontrado->getDni() . "\n";
+echo "Nombre: " . $clienteEncontrado->getNombre() . "\n";
+echo "Dirección: " . $clienteEncontrado->getDireccion() . "\n";
+echo "Teléfono: " . $clienteEncontrado->getTelefono() . "\n";
+echo "Email: " . $clienteEncontrado->getEmail() . "\n";
 
-        // Verificar si el cliente tiene reservas asociadas en la base de datos
-        $conexion = Conexion::obtenerInstancia();
-        $pdo = $conexion->obtenerConexion();
+// Verificar si el cliente tiene reservas asociadas en la base de datos
+$conexion = Conexion::obtenerInstancia();
+$pdo = $conexion->obtenerConexion();
 
-        $stmtReservas = $pdo->prepare("SELECT * FROM reservas WHERE cliente_dni = ?");
-        $stmtReservas->execute([$dniCliente]);
-        $reservasCliente = $stmtReservas->fetchAll(PDO::FETCH_ASSOC);
+$stmtReservas = $pdo->prepare("SELECT * FROM reservas WHERE cliente_dni = ?");
+$stmtReservas->execute([$dniCliente]);
+$reservasCliente = $stmtReservas->fetchAll(PDO::FETCH_ASSOC);
 
-        if (!empty($reservasCliente)) {
-            echo "\nEste cliente tiene reservas asociadas:\n";
-            foreach ($reservasCliente as $reserva) {
-                echo "Número de Reserva: " . $reserva['numero_reserva'] . " - Fecha de Reserva: " . formatoFechaDDMMYYYY($reserva['fecha_inicio']) . "\n";
-            }
-
+if (!empty($reservasCliente)) {
+    echo "\nEste cliente tiene reservas asociadas:\n";
+    foreach ($reservasCliente as $reserva) {
+        $fechaInicioReserva = date("d/m/Y", strtotime($reserva['fecha_inicio']));
+        echo "Número de Reserva: " . $reserva['numero_reserva'] . " - Fecha de Reserva: " . $fechaInicioReserva . "\n";
+    }
             // Preguntar si desea eliminar al cliente y sus reservas
             echo "\n¿Desea eliminar este cliente y todas sus reservas? (S/N): ";
             $opcion = strtoupper(trim(fgets(STDIN)));
@@ -234,7 +234,6 @@ function eliminarCliente()
                         unset($reservas[$keyReserva]);
                     }
                 }
-                echo "Las reservas asociadas al cliente fueron eliminadas exitosamente.\n";
 
                 // Eliminar el cliente de la lista en memoria
                 $keyCliente = array_search($clienteEncontrado, $clientes);
@@ -252,7 +251,7 @@ function eliminarCliente()
                 $stmtEliminarCliente = $pdo->prepare("DELETE FROM clientes WHERE dni = ?");
                 $stmtEliminarCliente->execute([$dniCliente]);
 
-                echo "El cliente y sus reservas fueron eliminados exitosamente.\n";
+                echo "Las reservas del cliente fueron eliminadas exitosamente.\n";
             } else {
                 echo "La eliminación ha sido cancelada.\n";
             }
@@ -266,7 +265,7 @@ function eliminarCliente()
                 $keyCliente = array_search($clienteEncontrado, $clientes);
                 if ($keyCliente !== false) {
                     unset($clientes[$keyCliente]);
-                    echo "El cliente fue eliminado exitosamente.\n";
+                
                 } else {
                     echo "No se pudo eliminar el cliente.\n";
                 }
@@ -275,7 +274,7 @@ function eliminarCliente()
                 $stmtEliminarCliente = $pdo->prepare("DELETE FROM clientes WHERE dni = ?");
                 $stmtEliminarCliente->execute([$dniCliente]);
 
-                echo "El cliente fue eliminado exitosamente en la base de datos.\n";
+                echo "El cliente fue eliminado exitosamente\n";
             } else {
                 echo "La eliminación ha sido cancelada.\n";
             }
