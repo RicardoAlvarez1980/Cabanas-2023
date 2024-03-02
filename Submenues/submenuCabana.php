@@ -181,6 +181,7 @@ function actualizarCabanaEnBaseDeDatos($cabana)
     ]);
 }
 // Función para eliminar una cabaña
+// Podriamos eliminar esto: . $e->getMessage() y quedaria solo el mensaje que no se pudo eliminar y ya.
 function eliminarCabana()
 {
     global $cabanas, $reservas;
