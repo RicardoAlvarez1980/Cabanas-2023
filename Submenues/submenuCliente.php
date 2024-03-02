@@ -188,8 +188,8 @@ function eliminarCliente()
 {
     global $clientes, $reservas;
 
-    echo "=======================\n";
-    echo "Eliminar Cliente\n";
+    echo "=======================";
+    echo "\nEliminar Cliente\n";
     echo "=======================\n";
 
     // Solicitar DNI del cliente a eliminar
