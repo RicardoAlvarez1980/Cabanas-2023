@@ -181,7 +181,7 @@ function actualizarCabanaEnBaseDeDatos($cabana)
     ]);
 }
 // Función para eliminar una cabaña
-// Podriamos eliminar esto: . $e->getMessage() y quedaria solo el mensaje que no se pudo eliminar y ya.
+
 function eliminarCabana()
 {
     global $cabanas, $reservas;
@@ -226,7 +226,7 @@ function eliminarCabana()
                 echo "La cabaña fue eliminada exitosamente.\n";
             } catch (PDOException $e) {
                 $pdo->rollBack();
-                echo "Error al eliminar la cabaña: " . $e->getMessage() . "\n";
+                echo "Error al eliminar la cabaña.\n";
                 echo "La cabaña tiene reservas activas.\n";
             }
         }
@@ -248,6 +248,10 @@ function listarCabanas()
     if (empty($cabanas)) {
         echo "No hay cabañas registradas.\n";
     } else {
+        // Ordenar el array de reservas por el número de reserva
+        usort($cabanas, function ($a, $b) {
+        return $a->getNumero() - $b->getNumero();
+        });
         echo "Cabañas registradas:\n";
         echo "-------------------------------\n";
         foreach ($cabanas as $cabana) {
