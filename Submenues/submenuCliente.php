@@ -292,7 +292,7 @@ function listarClientes()
 
     // Listar clientes en memoria
     if (empty($clientes)) {
-        echo "No hay clientes registrados.\n";
+        echo "\nNo hay clientes registrados.\n";
     } else {
         echo "\nClientes registrados:\n";
         echo "------------------------------\n";
