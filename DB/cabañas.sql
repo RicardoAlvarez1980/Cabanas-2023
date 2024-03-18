@@ -1,5 +1,5 @@
 CREATE TABLE Cabanas (
-  numero SERIAL PRIMARY KEY,
+  numero INT PRIMARY KEY,
   capacidad INT,
   descripcion TEXT,
   costo_diario NUMERIC(10, 2)
